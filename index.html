@@ -3,257 +3,534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Checklist de Rancho</title>
-    <!-- jsPDF e autoTable -->
+    <title>Checklist de Rancho Naval</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #0a2540;
+            --navy2: #0e3460;
+            --blue: #1565c0;
+            --gold: #f4a823;
+            --gold-light: #ffd97d;
+            --sky: #e3f0fb;
+            --white: #ffffff;
+            --gray: #f1f5f9;
+            --border: #d1dce8;
+            --text: #16293d;
+            --muted: #5e788f;
+            --green: #1b7a4b;
+            --green-bg: #e6f5ee;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #e9f0f5;
+            font-family: 'Barlow', sans-serif;
+            background: linear-gradient(160deg, #0a2540 0%, #1565c0 50%, #0a2540 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            padding: 12px 0 20px 0;
+            padding: 20px 0 40px 0;
         }
 
-        .container {
+        .app-wrapper {
             width: 100%;
-            max-width: 600px;
-            background: white;
-            border-radius: 28px 28px 0 0;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            padding: 20px 16px 30px 16px;
+            max-width: 640px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
         }
 
-        h1 {
-            font-size: 1.9rem;
+        /* ── HEADER ── */
+        .app-header {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px 20px 0 0;
+            padding: 28px 24px 22px;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-emblem {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .anchor-icon {
+            width: 52px; height: 52px;
+            background: var(--gold);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(244,168,35,0.4);
+        }
+
+        .header-text h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+        }
+
+        .header-text p {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.82rem;
+            margin-top: 2px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── VESSEL SELECTION SCREEN ── */
+        #vessel-screen {
+            background: var(--white);
+            border-radius: 0 0 20px 20px;
+            padding: 32px 24px 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .vessel-screen-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .vessel-screen-sub {
+            color: var(--muted);
+            font-size: 0.88rem;
+            margin-bottom: 28px;
+        }
+
+        .vessel-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .vessel-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            background: var(--white);
+            position: relative;
+        }
+
+        .vessel-card:hover {
+            border-color: var(--blue);
+            background: var(--sky);
+        }
+
+        .vessel-card.selected {
+            border-color: var(--navy);
+            background: var(--sky);
+            box-shadow: 0 0 0 3px rgba(21,101,192,0.15);
+        }
+
+        .vessel-card input[type="radio"] {
+            width: 20px; height: 20px;
+            accent-color: var(--navy);
+            flex-shrink: 0;
+        }
+
+        .vessel-info { flex: 1; }
+
+        .vessel-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--navy);
+            letter-spacing: 0.3px;
+        }
+
+        .vessel-meta {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .vessel-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.4px;
+        }
+        .badge-aco { background: #e8f0fe; color: #1a56db; }
+        .badge-madeira { background: #fef3c7; color: #92400e; }
+
+        .btn-start {
+            width: 100%;
+            padding: 16px;
+            background: var(--navy);
+            color: var(--white);
+            border: none;
+            border-radius: 14px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(10,37,64,0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-start:hover { background: var(--blue); transform: translateY(-1px); }
+        .btn-start:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* ── CHECKLIST SCREEN ── */
+        #checklist-screen {
+            display: none;
+            background: var(--white);
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .vessel-banner {
+            background: linear-gradient(100deg, var(--navy) 0%, var(--navy2) 100%);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .vessel-banner-info {}
+        .vessel-banner-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: 0.5px;
+        }
+        .vessel-banner-id {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.55);
+            margin-top: 1px;
+            font-family: monospace;
+        }
+
+        .btn-change-vessel {
+            padding: 7px 14px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
             font-weight: 600;
-            color: #0b3954;
-            margin: 0 0 8px 0;
-            padding-bottom: 6px;
-            border-bottom: 3px solid #ffb347;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+        .btn-change-vessel:hover { background: rgba(255,255,255,0.22); }
+
+        .checklist-body {
+            padding: 16px 16px 30px;
+        }
+
+        .progress-bar-wrap {
+            background: var(--gray);
+            border-radius: 8px;
+            height: 8px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--gold));
+            border-radius: 8px;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 500;
         }
 
         .cat-header {
-            background: #0b3954;
-            color: white;
-            padding: 14px 18px;
-            margin: 16px 0 6px 0;
-            border-radius: 40px 40px 20px 20px;
+            background: var(--navy);
+            color: var(--white);
+            padding: 11px 16px;
+            margin: 16px 0 6px;
+            border-radius: 10px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cat-count {
+            margin-left: auto;
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.15);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-family: 'Barlow', sans-serif;
             font-weight: 600;
-            font-size: 1.4rem;
-            box-shadow: 0 4px 8px rgba(11,57,84,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .item-row {
             display: flex;
             align-items: flex-start;
             gap: 12px;
-            padding: 14px 12px;
+            padding: 12px 12px;
             margin: 4px 0;
-            background: #fdfdfd;
-            border-radius: 24px;
-            border: 1px solid #dee7ed;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            background: #fafbfd;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            transition: all 0.15s;
         }
 
-        .item-row:hover {
-            background: #f6fafd;
-            border-color: #b0c8da;
+        .item-row:hover { background: var(--sky); border-color: #adc8e8; }
+
+        .item-row:has(:checked) {
+            background: var(--green-bg);
+            border-color: #5cb88a;
         }
 
         .item-row input[type="checkbox"] {
-            width: 24px;
-            height: 24px;
-            min-width: 24px;
-            accent-color: #0b3954;
+            width: 22px; height: 22px;
+            min-width: 22px;
+            accent-color: var(--green);
             margin-top: 2px;
             cursor: pointer;
         }
 
-        .item-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .item-content { flex: 1; display: flex; flex-direction: column; gap: 7px; }
 
         .item-name {
             font-weight: 600;
-            font-size: 1.1rem;
-            color: #1a2e3f;
+            font-size: 0.97rem;
+            color: var(--text);
             line-height: 1.3;
-            word-break: break-word;
+        }
+
+        .item-row:has(:checked) .item-name {
+            text-decoration: line-through;
+            color: var(--green);
         }
 
         .item-details {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 10px 16px;
+            gap: 6px 10px;
         }
 
         .max-qty-badge {
-            background: #e4ecf3;
-            color: #0b3954;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            background: #dce8f5;
+            color: var(--navy2);
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
         }
 
         .unit-badge {
-            background: #f0f0f0;
-            color: #2b4c6b;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.9rem;
+            background: var(--gray);
+            color: var(--muted);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
         }
 
         .qty-control {
             display: inline-flex;
             align-items: center;
-            background: white;
-            border: 1px solid #b0c8da;
-            border-radius: 40px;
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: 30px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .qty-control button {
-            background: #f0f4f8;
+            background: var(--gray);
             border: none;
-            width: 36px;
-            height: 36px;
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #0b3954;
+            width: 32px; height: 32px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--navy);
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.1s;
-            line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.1s;
         }
-
-        .qty-control button:hover {
-            background: #d9e2ec;
-        }
-
-        .qty-control button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+        .qty-control button:hover { background: #d0dce8; }
+        .qty-control button:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .qty-control span {
-            min-width: 40px;
+            min-width: 36px;
             text-align: center;
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #1e2f3d;
-            background: white;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+            background: var(--white);
         }
 
         .item-note {
-            font-size: 0.8rem;
-            color: #b3530e;
-            background: #fff1e0;
-            padding: 2px 12px;
-            border-radius: 30px;
-            display: inline-block;
-            width: fit-content;
+            font-size: 0.75rem;
+            color: #92400e;
+            background: #fef3c7;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
         }
 
         .action-buttons {
             display: flex;
-            gap: 12px;
-            margin-top: 32px;
-            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 28px;
         }
 
-        .action-buttons button {
-            flex: 1 1 200px;
-            padding: 16px 12px;
-            background: white;
-            border: 2px solid #0b3954;
-            border-radius: 60px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #0b3954;
+        .btn-action {
+            flex: 1;
+            padding: 14px 10px;
+            border-radius: 12px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .action-buttons button:hover {
-            background: #0b3954;
-            color: white;
+        .btn-clear {
+            background: var(--white);
+            border: 2px solid var(--border);
+            color: var(--muted);
         }
+        .btn-clear:hover { border-color: #e53e3e; color: #e53e3e; }
+
+        .btn-pdf {
+            background: var(--navy);
+            border: 2px solid var(--navy);
+            color: var(--white);
+            box-shadow: 0 4px 14px rgba(10,37,64,0.3);
+        }
+        .btn-pdf:hover { background: var(--blue); border-color: var(--blue); }
 
         .footer-note {
             text-align: center;
-            margin-top: 20px;
-            color: #6b7c8b;
-            font-size: 0.8rem;
-            border-top: 1px dashed #cbd6e2;
-            padding-top: 18px;
-        }
-
-        /* check state subtle */
-        .item-row:has(:checked) {
-            background: #e3f0da;
-            border-color: #2b7a4b;
-        }
-
-        .item-row:has(:checked) .item-name {
-            text-decoration: line-through 1.5px #2b7a4b;
-            color: #2d5a3b;
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 14px;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Checklist do Rancho</h1>
+<div class="app-wrapper">
 
-    <div id="checklist-container"></div>
+    <!-- HEADER -->
+    <div class="app-header">
+        <div class="header-emblem">
+            <div class="anchor-icon">⚓</div>
+            <div class="header-text">
+                <h1>Checklist de Rancho</h1>
+                <p>Sistema Naval de Controle de Suprimentos</p>
+            </div>
+        </div>
+    </div>
 
-    <div class="action-buttons">
-        <button id="clear-all">Limpar tudo</button>
-        <button id="generate-pdf">Gerar PDF</button>
+    <!-- VESSEL SELECTION -->
+    <div id="vessel-screen">
+        <p class="vessel-screen-title">Selecione a Embarcação</p>
+        <p class="vessel-screen-sub">Escolha a embarcação para iniciar o checklist de rancho.</p>
+
+        <div class="vessel-grid" id="vessel-grid"></div>
+
+        <button class="btn-start" id="btn-start" disabled onclick="startChecklist()">
+            ⚓ Iniciar Checklist
+        </button>
     </div>
-    <div class="footer-note">
-        Marque os itens e ajuste a quantidade (limite máximo indicado).
+
+    <!-- CHECKLIST -->
+    <div id="checklist-screen">
+        <div class="vessel-banner">
+            <div class="vessel-banner-info">
+                <div class="vessel-banner-name" id="banner-name">—</div>
+                <div class="vessel-banner-id" id="banner-id">—</div>
+            </div>
+            <button class="btn-change-vessel" onclick="changeVessel()">↩ Trocar</button>
+        </div>
+
+        <div class="checklist-body">
+            <div class="progress-label" id="progress-label">0 itens selecionados</div>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+
+            <div id="checklist-container"></div>
+
+            <div class="action-buttons">
+                <button class="btn-action btn-clear" id="clear-all">🗑 Limpar</button>
+                <button class="btn-action btn-pdf" id="generate-pdf">📄 Gerar PDF</button>
+            </div>
+
+            <div class="footer-note">
+                Marque os itens e ajuste as quantidades (máximo indicado por embarcação).
+            </div>
+        </div>
     </div>
+
 </div>
 
 <script>
 (function() {
-    // --------------------------------------------------------------
-    // TODOS OS ITENS EXTRAÍDOS DA PLANILHA (com quant totais)
-    // --------------------------------------------------------------
+
+    // ─────────────────────────────────────────────
+    // DADOS DAS EMBARCAÇÕES
+    // ─────────────────────────────────────────────
+    const vessels = [
+        { name: "RS CÓRREGO DO OURO", ano: 2024, casco: "Aço naval",   obs: "Academia, Starlink, molinete 7t" },
+        { name: "RS FRADE",           ano: 2023, casco: "Aço naval",   obs: "" },
+        { name: "RS SANA",            ano: 2022, casco: "Aço naval",   obs: "" },
+        { name: "RS MACAÉ",           ano: 2017, casco: "Aço naval",   obs: "" },
+        { name: "RS TRAPOLEO",        ano: 2015, casco: "Madeira",     obs: "" },
+        { name: "RS TRAPICHE",        ano: 2023, casco: "Madeira",     obs: "" },
+        { name: "SEM LIMITES V",      ano: 2012, casco: "Madeira",     obs: "" },
+        { name: "SEM LIMITES 2013",   ano: 2012, casco: "Madeira",     obs: "" },
+        { name: "SEM LIMITES III",    ano: 2010, casco: "Madeira",     obs: "" },
+        { name: "SEM LIMITES II",     ano: 2008, casco: "Madeira",     obs: "" },
+        { name: "RS MARIA DO CARMO",  ano: 2010, casco: "Madeira",     obs: "" },
+    ];
+
+    // ─────────────────────────────────────────────
+    // ITENS DO CHECKLIST
+    // ─────────────────────────────────────────────
     const itemsData = [
         // CARNES
         { cat: "CARNES", name: "LAGARTO BOVINO", maxQty: "5", unit: "KG" },
-        { cat: "CARNES", name: "PATINHO BOVINO ( PICADINHO )", maxQty: "10", unit: "KG" },
+        { cat: "CARNES", name: "PATINHO BOVINO (PICADINHO)", maxQty: "10", unit: "KG" },
         { cat: "CARNES", name: "ALCATRA C/ BOVINA", maxQty: "25", unit: "KG" },
         { cat: "CARNES", name: "CONTRA FILE BOVINO", maxQty: "20", unit: "KG" },
         { cat: "CARNES", name: "COSTELA BOVINA", maxQty: "15", unit: "KG" },
         { cat: "CARNES", name: "PEITO BOVINO", maxQty: "10", unit: "KG" },
-        { cat: "CARNES", name: "ACÉM BOVINO ( MOIDO )", maxQty: "12", unit: "KG" },
+        { cat: "CARNES", name: "ACÉM BOVINO (MOÍDO)", maxQty: "12", unit: "KG" },
         { cat: "CARNES", name: "CUPIM BOVINO", maxQty: "8", unit: "KG" },
         { cat: "CARNES", name: "RABADA BOVINA CORTADA", maxQty: "10", unit: "KG" },
         { cat: "CARNES", name: "MOCOTÓ BOVINO", maxQty: "5", unit: "KG" },
@@ -263,399 +540,615 @@
         { cat: "CARNES", name: "ASA DE FRANGO", maxQty: "10", unit: "KG" },
         { cat: "CARNES", name: "COXINHA DA ASA DE FRANGO", maxQty: "10", unit: "KG" },
         { cat: "CARNES", name: "CORAÇÃO DE FRANGO", maxQty: "4", unit: "KG" },
-        { cat: "CARNES", name: "CARRE SUINO", maxQty: "10", unit: "KG" },
-        { cat: "CARNES", name: "COSTELA SUINA", maxQty: "10", unit: "KG" },
-        { cat: "CARNES", name: "LOMBO SUINO", maxQty: "7", unit: "KG" },
+        { cat: "CARNES", name: "CARRÉ SUÍNO", maxQty: "10", unit: "KG" },
+        { cat: "CARNES", name: "COSTELA SUÍNA", maxQty: "10", unit: "KG" },
+        { cat: "CARNES", name: "LOMBO SUÍNO", maxQty: "7", unit: "KG" },
         { cat: "CARNES", name: "FILÉ DE PESCADA BRANCA / TILÁPIA", maxQty: "10", unit: "KG" },
-        { cat: "CARNES", name: "PERNIL SUINO", maxQty: "10", unit: "KG" },
-        { cat: "CARNES", name: "BACON FATIADO KG", maxQty: "10", unit: "GR" },
-        { cat: "CARNES", name: "CARNE SECA DIANTEIRA KG", maxQty: "10", unit: "KG" },
-        { cat: "CARNES", name: "CARNE DE HAMBURGUER BOVINO", maxQty: "2", unit: "CX" },
-        { cat: "CARNES", name: "SALSICHA KG", maxQty: "5", unit: "KG" },
-        { cat: "CARNES", name: "PÉ SUINO SALGADO", maxQty: "2", unit: "KG" },
+        { cat: "CARNES", name: "PERNIL SUÍNO", maxQty: "10", unit: "KG" },
+        { cat: "CARNES", name: "BACON FATIADO", maxQty: "10", unit: "KG" },
+        { cat: "CARNES", name: "CARNE SECA DIANTEIRA", maxQty: "10", unit: "KG" },
+        { cat: "CARNES", name: "HAMBÚRGUER BOVINO", maxQty: "2", unit: "CX" },
+        { cat: "CARNES", name: "SALSICHA", maxQty: "5", unit: "KG" },
+        { cat: "CARNES", name: "PÉ SUÍNO SALGADO", maxQty: "2", unit: "KG" },
         { cat: "CARNES", name: "RABO SUÍNO SALGADO", maxQty: "2", unit: "KG" },
-        { cat: "CARNES", name: "LINGUICA CALABRESA KG", maxQty: "10", unit: "KG" },
-        { cat: "CARNES", name: "LINGUICA DE FRANGO", maxQty: "3", unit: "KG" },
-        { cat: "CARNES", name: "LINGUICA TOSCANA KG", maxQty: "8", unit: "KG" },
+        { cat: "CARNES", name: "LINGUIÇA CALABRESA", maxQty: "10", unit: "KG" },
+        { cat: "CARNES", name: "LINGUIÇA DE FRANGO", maxQty: "3", unit: "KG" },
+        { cat: "CARNES", name: "LINGUIÇA TOSCANA", maxQty: "8", unit: "KG" },
         { cat: "CARNES", name: "PÃO DE ALHO", maxQty: "5", unit: "UNIDADE" },
         { cat: "CARNES", name: "BARRIGA SUÍNA", maxQty: "10", unit: "KG" },
         { cat: "CARNES", name: "CHULETA BOVINA", maxQty: "8", unit: "KG" },
-        { cat: "CARNES", name: "PEITO BOVINO", maxQty: "8", unit: "KG" },
-        { cat: "CARNES", name: "BATATA PRE FRITA  CONGELADA  2KG", maxQty: "5", unit: "PACOTES" },
-
+        { cat: "CARNES", name: "BATATA PRÉ-FRITA CONGELADA 2KG", maxQty: "5", unit: "PCT" },
         // PADARIA
-        { cat: "PADARIA", name: "MORTADELA FATIADO KG", maxQty: "2", unit: "KG" },
-        { cat: "PADARIA", name: "PRESUNTO COZIDO KG FATIADO", maxQty: "7", unit: "KG" },
-        { cat: "PADARIA", name: "QUEIJO MUSSARELA KG FATIADO", maxQty: "10", unit: "KG" },
-        { cat: "PADARIA", name: "QUEIJO MINAS FRESCAL", maxQty: "10", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "MANTEIGA COM SAL 500G", maxQty: "5", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "MARGARINA QUALY 500 G", maxQty: "8", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "PIZZA PRÉ PRONTA", maxQty: "20", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "REQUEIJÃO ELEGE", maxQty: "12", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "LEITE  INTEGRAL 1 L", maxQty: "24", unit: "LITROS" },
-        { cat: "PADARIA", name: "LEITE EM PÓ 500G", maxQty: "5", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "PÃO PLUS VITA", maxQty: "15", unit: "PACOTES" },
-        { cat: "PADARIA", name: "BISNAGUINHA DE PÃO 220G", maxQty: "10", unit: "PACOTES" },
-        { cat: "PADARIA", name: "PÃO DE HOT DOG", maxQty: "36", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "PÃO HAMBURGUER BRIOCHE", maxQty: "40", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "BOLOS PANCO / PLUSVITA", maxQty: "10", unit: "PACOTES" },
-        { cat: "PADARIA", name: "BISCOITO CREAM CRACKER 200 GR", maxQty: "7", unit: "PACOTES" },
-        { cat: "PADARIA", name: "BISCOITO MAIZENA 200 GR", maxQty: "8", unit: "PACOTES" },
-        { cat: "PADARIA", name: "BISCOITO RECHEADO 140 GR VARIADOS", maxQty: "40", unit: "PACOTES" },
-        { cat: "PADARIA", name: "QUEIJO RALADO 100 GR", maxQty: "15", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "YOGURT NESTLÉ / DANONE / ITAMBE", maxQty: "10", unit: "UNIDADES" },
-        { cat: "PADARIA", name: "LEITE FERMENTADO 1L", maxQty: "5", unit: "UNIDADES" },
+        { cat: "PADARIA", name: "MORTADELA FATIADA", maxQty: "2", unit: "KG" },
+        { cat: "PADARIA", name: "PRESUNTO COZIDO FATIADO", maxQty: "7", unit: "KG" },
+        { cat: "PADARIA", name: "QUEIJO MUSSARELA FATIADO", maxQty: "10", unit: "KG" },
+        { cat: "PADARIA", name: "QUEIJO MINAS FRESCAL", maxQty: "10", unit: "UN" },
+        { cat: "PADARIA", name: "MANTEIGA COM SAL 500G", maxQty: "5", unit: "UN" },
+        { cat: "PADARIA", name: "MARGARINA QUALY 500G", maxQty: "8", unit: "UN" },
+        { cat: "PADARIA", name: "PIZZA PRÉ-PRONTA", maxQty: "20", unit: "UN" },
+        { cat: "PADARIA", name: "REQUEIJÃO ELEGE", maxQty: "12", unit: "UN" },
+        { cat: "PADARIA", name: "LEITE INTEGRAL 1L", maxQty: "24", unit: "L" },
+        { cat: "PADARIA", name: "LEITE EM PÓ 500G", maxQty: "5", unit: "UN" },
+        { cat: "PADARIA", name: "PÃO PLUS VITA", maxQty: "15", unit: "PCT" },
+        { cat: "PADARIA", name: "BISNAGUINHA DE PÃO 220G", maxQty: "10", unit: "PCT" },
+        { cat: "PADARIA", name: "PÃO DE HOT DOG", maxQty: "36", unit: "UN" },
+        { cat: "PADARIA", name: "PÃO HAMBÚRGUER BRIOCHE", maxQty: "40", unit: "UN" },
+        { cat: "PADARIA", name: "BOLOS PANCO / PLUSVITA", maxQty: "10", unit: "PCT" },
+        { cat: "PADARIA", name: "BISCOITO CREAM CRACKER 200G", maxQty: "7", unit: "PCT" },
+        { cat: "PADARIA", name: "BISCOITO MAIZENA 200G", maxQty: "8", unit: "PCT" },
+        { cat: "PADARIA", name: "BISCOITO RECHEADO 140G VARIADOS", maxQty: "40", unit: "PCT" },
+        { cat: "PADARIA", name: "QUEIJO RALADO 100G", maxQty: "15", unit: "UN" },
+        { cat: "PADARIA", name: "YOGURT NESTLÉ / DANONE / ITAMBÉ", maxQty: "10", unit: "UN" },
+        { cat: "PADARIA", name: "LEITE FERMENTADO 1L", maxQty: "5", unit: "UN" },
         { cat: "PADARIA", name: "MASSA DE BOLO VARIADOS", maxQty: "10", unit: "KG" },
         { cat: "PADARIA", name: "CATUPIRY (MARCA CATUPIRY)", maxQty: "2", unit: "BISNAGA" },
         { cat: "PADARIA", name: "CREME CHEESE", maxQty: "2", unit: "BISNAGA" },
-        { cat: "PADARIA", name: "QUEIJO COALHO", maxQty: "5", unit: "PACOTES" },
-
+        { cat: "PADARIA", name: "QUEIJO COALHO", maxQty: "5", unit: "PCT" },
         // ALIMENTOS
-        { cat: "ALIMENTOS", name: "TAPIOCA 500 G", maxQty: "6", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "EXTRATO DE TOMATE  300G", maxQty: "14", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MACARRAO ESPAGUETTI 500G", maxQty: "10", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MACARRÃO PARAFUSO 500G", maxQty: "10", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MACARRÃO TALHARIM 500G", maxQty: "6", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MACARRÃO DE LASANHA", maxQty: "5", unit: "PACOTES" },
-        { cat: "ALIMENTOS", name: "AÇUCAR REFINADO", maxQty: "10", unit: "KG" },
-        { cat: "ALIMENTOS", name: "AÇUCAR CRISTAL KG", maxQty: "10", unit: "KG" },
-        { cat: "ALIMENTOS", name: "AÇUCAR MASCAVO", maxQty: "3", unit: "UNIDADE" },
-        { cat: "ALIMENTOS", name: "ARROZ BRANCO TIPO 1 KG", maxQty: "30", unit: "KG" },
-        { cat: "ALIMENTOS", name: "PÓ DE CAFE  PILÃO OU MELITA", maxQty: "12", unit: "KG" },
-        { cat: "ALIMENTOS", name: "CAFÉ GOURMET(CAFETEIRA)", maxQty: "2", unit: "KG" },
-        { cat: "ALIMENTOS", name: "FANDANGOS VARIADOS", maxQty: "30", unit: "PACOTES" },
-        { cat: "ALIMENTOS", name: "FARINHA DE MANDIOCA KG", maxQty: "5", unit: "KG" },
-        { cat: "ALIMENTOS", name: "FARINHA DE ROSCA KG", maxQty: "5", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "AMIDO DE MILHO, MAISENA", maxQty: "3", unit: "KG" },
-        { cat: "ALIMENTOS", name: "FARINHA DE TRIGO KG", maxQty: "10", unit: "KG" },
-        { cat: "ALIMENTOS", name: "CHAMPIGNON", maxQty: "3", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "FUBÁ", maxQty: "3", unit: "KG" },
-        { cat: "ALIMENTOS", name: "PAÇOCA", maxQty: "2", unit: "CX" },
-        { cat: "ALIMENTOS", name: "CAIXA DE BOMBOM ( GAROTO )", maxQty: "20", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "AMENDOIM", maxQty: "2", unit: "CX" },
-        { cat: "ALIMENTOS", name: "BALA", maxQty: "6", unit: "PACOTES" },
-        { cat: "ALIMENTOS", name: "COCO RALADO", maxQty: "10", unit: "PACOTES" },
-        { cat: "ALIMENTOS", name: "FERMENTO BIOLOGICO", maxQty: "4", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "LEITE DE COCO 500G", maxQty: "6", unit: "UNIDADES" },
+        { cat: "ALIMENTOS", name: "TAPIOCA 500G", maxQty: "6", unit: "UN" },
+        { cat: "ALIMENTOS", name: "EXTRATO DE TOMATE 300G", maxQty: "14", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MACARRÃO ESPAGUETE 500G", maxQty: "10", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MACARRÃO PARAFUSO 500G", maxQty: "10", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MACARRÃO TALHARIM 500G", maxQty: "6", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MACARRÃO DE LASANHA", maxQty: "5", unit: "PCT" },
+        { cat: "ALIMENTOS", name: "AÇÚCAR REFINADO", maxQty: "10", unit: "KG" },
+        { cat: "ALIMENTOS", name: "AÇÚCAR CRISTAL", maxQty: "10", unit: "KG" },
+        { cat: "ALIMENTOS", name: "AÇÚCAR MASCAVO", maxQty: "3", unit: "UN" },
+        { cat: "ALIMENTOS", name: "ARROZ BRANCO TIPO 1", maxQty: "30", unit: "KG" },
+        { cat: "ALIMENTOS", name: "PÓ DE CAFÉ PILÃO / MELITTA", maxQty: "12", unit: "KG" },
+        { cat: "ALIMENTOS", name: "CAFÉ GOURMET (CAFETEIRA)", maxQty: "2", unit: "KG" },
+        { cat: "ALIMENTOS", name: "FARINHA DE TRIGO 5KG", maxQty: "3", unit: "PCT" },
+        { cat: "ALIMENTOS", name: "FARINHA DE MANDIOCA 1KG", maxQty: "4", unit: "PCT" },
+        { cat: "ALIMENTOS", name: "FUBÁ MIMOSO 1KG", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "FERMENTO BIOLÓGICO", maxQty: "4", unit: "UN" },
+        { cat: "ALIMENTOS", name: "LEITE DE COCO 500G", maxQty: "6", unit: "UN" },
         { cat: "ALIMENTOS", name: "FEIJÃO PRETO", maxQty: "20", unit: "KG" },
         { cat: "ALIMENTOS", name: "FEIJÃO BRANCO", maxQty: "3", unit: "KG" },
-        { cat: "ALIMENTOS", name: "NESCAU LATA 400 GR", maxQty: "3", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "OLEO DE SOJA 900ML", maxQty: "24", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "GELATINA DE ABACAXI / MORANGO / LIMÃ", maxQty: "12", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "AVEIA NATURAL 1KG", maxQty: "2", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "GOIABADA 600 GR", maxQty: "3", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "COBERTURA DE SORVETE 130 GR", maxQty: "3", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "LEITE CONDENSADO 395 GR", maxQty: "25", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "FLOCÃO 500G", maxQty: "10", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "GRANOLA 500G", maxQty: "2", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "CREME DE LEITE TP 200 G", maxQty: "30", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "AZEITE DE OLIVA EXTRA VIRGEM", maxQty: "4", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MOLHO SHOYU 1L", maxQty: "2", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MOLHO DE PIMENTA", maxQty: "2", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MOSTARDA", maxQty: "2", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "PALMITO 300G", maxQty: "8", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "KETCHUP 1L", maxQty: "6", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "BARBECUE 400G", maxQty: "3", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "ERVILHA EM LATA 200 GR", maxQty: "10", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MAIONESE HELLMANS 500G", maxQty: "8", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MILHO EM LATA 200 GR", maxQty: "15", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "AZEITONA VERDE 500 GR SEM CAROÇO", maxQty: "3", unit: "KG" },
-        { cat: "ALIMENTOS", name: "BATATA PALHA 400 GR", maxQty: "10", unit: "PACOTES" },
-        { cat: "ALIMENTOS", name: "OREGANO KG", maxQty: "3", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "SARDINHA EM LATA OLEO 125 GR", maxQty: "8", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "VINAGRE 750ML TINTO", maxQty: "2", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "FANTA 2L", maxQty: "10", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "COCA COLA  ZERO 2L", maxQty: "12", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "COCA COLA  2L", maxQty: "12", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "GUARANA KUAT OU ANTARTICA  PET 2L", maxQty: "10", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "SUCO DE FRUTAS", maxQty: "10", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "CHÁ MATE 1.5 L", maxQty: "4", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "H20 LIMONETTO 1,5 L", maxQty: "5", unit: "FARDOS" },
-        { cat: "ALIMENTOS", name: "H2O LIMONETTO 500ML", maxQty: "5", unit: "FARDOS" },
-        { cat: "ALIMENTOS", name: "ÁGUA MINERAL S/ GÁS 500 ML", maxQty: "25", unit: "FARDOS" },
-        { cat: "ALIMENTOS", name: "ÁGUA C/ GÁS 500 ML", maxQty: "5", unit: "FARDOS" },
+        { cat: "ALIMENTOS", name: "NESCAU LATA 400G", maxQty: "3", unit: "UN" },
+        { cat: "ALIMENTOS", name: "ÓLEO DE SOJA 900ML", maxQty: "24", unit: "UN" },
+        { cat: "ALIMENTOS", name: "GELATINA ABACAXI / MORANGO / LIMÃO", maxQty: "12", unit: "UN" },
+        { cat: "ALIMENTOS", name: "AVEIA NATURAL 1KG", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "GOIABADA 600G", maxQty: "3", unit: "UN" },
+        { cat: "ALIMENTOS", name: "LEITE CONDENSADO 395G", maxQty: "25", unit: "UN" },
+        { cat: "ALIMENTOS", name: "FLOCÃO 500G", maxQty: "10", unit: "UN" },
+        { cat: "ALIMENTOS", name: "GRANOLA 500G", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "CREME DE LEITE TP 200G", maxQty: "30", unit: "UN" },
+        { cat: "ALIMENTOS", name: "AZEITE DE OLIVA EXTRA VIRGEM", maxQty: "4", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MOLHO SHOYU 1L", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MOLHO DE PIMENTA", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MOSTARDA", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "PALMITO 300G", maxQty: "8", unit: "UN" },
+        { cat: "ALIMENTOS", name: "KETCHUP 1L", maxQty: "6", unit: "UN" },
+        { cat: "ALIMENTOS", name: "BARBECUE 400G", maxQty: "3", unit: "UN" },
+        { cat: "ALIMENTOS", name: "ERVILHA EM LATA 200G", maxQty: "10", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MAIONESE HELLMAN'S 500G", maxQty: "8", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MILHO EM LATA 200G", maxQty: "15", unit: "UN" },
+        { cat: "ALIMENTOS", name: "AZEITONA VERDE SEM CAROÇO 500G", maxQty: "3", unit: "KG" },
+        { cat: "ALIMENTOS", name: "BATATA PALHA 400G", maxQty: "10", unit: "PCT" },
+        { cat: "ALIMENTOS", name: "ORÉGANO", maxQty: "3", unit: "UN" },
+        { cat: "ALIMENTOS", name: "SARDINHA EM LATA ÓLEO 125G", maxQty: "8", unit: "UN" },
+        { cat: "ALIMENTOS", name: "VINAGRE TINTO 750ML", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "FANTA 2L", maxQty: "10", unit: "UN" },
+        { cat: "ALIMENTOS", name: "COCA-COLA ZERO 2L", maxQty: "12", unit: "UN" },
+        { cat: "ALIMENTOS", name: "COCA-COLA 2L", maxQty: "12", unit: "UN" },
+        { cat: "ALIMENTOS", name: "GUARANÁ KUAT / ANTÁRTICA 2L", maxQty: "10", unit: "UN" },
+        { cat: "ALIMENTOS", name: "SUCO DE FRUTAS", maxQty: "10", unit: "UN" },
+        { cat: "ALIMENTOS", name: "CHÁ MATE 1,5L", maxQty: "4", unit: "UN" },
+        { cat: "ALIMENTOS", name: "ÁGUA MINERAL S/ GÁS 500ML", maxQty: "25", unit: "FARDOS" },
+        { cat: "ALIMENTOS", name: "ÁGUA C/ GÁS 500ML", maxQty: "5", unit: "FARDOS" },
         { cat: "ALIMENTOS", name: "CHOCOLATE GRANULADO", maxQty: "1", unit: "PCT" },
-        { cat: "ALIMENTOS", name: "BARRA DE CHOCOLATE", maxQty: "3", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "MEL DE ABELHA G", maxQty: "2", unit: "UNIDADES" },
-        { cat: "ALIMENTOS", name: "CREME DE CEBOLA G", maxQty: "1", unit: "FD" },
-        { cat: "ALIMENTOS", name: "CANJICA", maxQty: "4", unit: "UNIDADES" },
-
+        { cat: "ALIMENTOS", name: "BARRA DE CHOCOLATE", maxQty: "3", unit: "UN" },
+        { cat: "ALIMENTOS", name: "MEL DE ABELHA", maxQty: "2", unit: "UN" },
+        { cat: "ALIMENTOS", name: "CREME DE CEBOLA", maxQty: "1", unit: "FD" },
+        { cat: "ALIMENTOS", name: "CANJICA", maxQty: "4", unit: "UN" },
         // DESCARTÁVEIS
-        { cat: "DESCARTÁVEIS", name: "COPO DESCARTAVEL 200ML CX C/ 100 UN", maxQty: "2", unit: "CX" },
-        { cat: "DESCARTÁVEIS", name: "PAPEL HIGIENICO 12 UNIDADES", maxQty: "6", unit: "PACOTES" },
-        { cat: "DESCARTÁVEIS", name: "PAPEL TOALHA P/ FRITURA", maxQty: "10", unit: "PACOTES" },
-        { cat: "DESCARTÁVEIS", name: "GUARDANAPO", maxQty: "10", unit: "UNIDADES" },
-        { cat: "DESCARTÁVEIS", name: "FOLHA DE ALUMINIO GRANDE", maxQty: "10", unit: "UNIDADES" },
-        { cat: "DESCARTÁVEIS", name: "PANO PERFEX ROLO", maxQty: "1", unit: "UNIDADES" },
-        { cat: "DESCARTÁVEIS", name: "FILME PVC", maxQty: "2", unit: "UNIDADES" },
-        { cat: "DESCARTÁVEIS", name: "PALITO DE DENTE GINA", maxQty: "6", unit: "UNIDADES" },
-        { cat: "DESCARTÁVEIS", name: "CARVÃO 3KG", maxQty: "6", unit: "UNIDADES" },
-        { cat: "DESCARTÁVEIS", name: "PALITO DE ESPETO", maxQty: "2", unit: "PACOTES" },
-        { cat: "DESCARTÁVEIS", name: "PANO DE PRATO", maxQty: "10", unit: "UNIDADES" },
-        { cat: "DESCARTÁVEIS", name: "PLASTICO CELOFANE P/ ASSAR", maxQty: "3", unit: "UNIDADES" },
-
-        // PRODUTOS DE LIMPEZAS
-        { cat: "PRODUTOS DE LIMPEZAS", name: "AGUA SANITARIA 2L", maxQty: "10", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "ALCOOL 92 1 LT", maxQty: "3", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "ALCOOL EM GEL 500 GR", maxQty: "5", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "AMACIANTE DE ROUPAS 2L URCA", maxQty: "10", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "BOM AR", maxQty: "4", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "LIMPA CASA PERFUME 500 ML", maxQty: "6", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "DESINFETANTE 5L", maxQty: "8", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "DETERGENTE 500 ML", maxQty: "2", unit: "CX" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "SABÃO DE ROUPA LIQUIDO 5L", maxQty: "5", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "SABÃO EM PASTA", maxQty: "2", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "SABÃO DE COCO", maxQty: "3", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "ESPONJA DUPLA FACE (LAVA-LOUÇAS)", maxQty: "10", unit: "PACOTES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "VEJA MULTIUSO 500 ML", maxQty: "10", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "LUVA", maxQty: "10", unit: "PARES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "BOMBRIL", maxQty: "10", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "VASSOURA PLASTICA", maxQty: "4", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "RODO", maxQty: "2", unit: "UNIDADE" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "BALDE", maxQty: "2", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "LIMPA VIDRO URCA", maxQty: "2", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "VEJA PERFUME 2L", maxQty: "6", unit: "UNIDADES" },
-        { cat: "PRODUTOS DE LIMPEZAS", name: "SBP INSETOS", maxQty: "4", unit: "UNIDADES" },
-
-        // HIGIENE PESSOAL (com observação)
-        { cat: "HIGIENE PESSOAL", name: "CREME DENTAL SORRISO", maxQty: "10", unit: "UNIDADES", note: "SÓMENTE PARA EQUIPE RS" },
-        { cat: "HIGIENE PESSOAL", name: "SABONETE PROTEX", maxQty: "16", unit: "UNIDADES", note: "SÓMENTE PARA EQUIPE RS" },
-
+        { cat: "DESCARTÁVEIS", name: "COPO DESCARTÁVEL 200ML CX/100", maxQty: "2", unit: "CX" },
+        { cat: "DESCARTÁVEIS", name: "PAPEL HIGIÊNICO 12 UN", maxQty: "6", unit: "PCT" },
+        { cat: "DESCARTÁVEIS", name: "PAPEL TOALHA P/ FRITURA", maxQty: "10", unit: "PCT" },
+        { cat: "DESCARTÁVEIS", name: "GUARDANAPO", maxQty: "10", unit: "UN" },
+        { cat: "DESCARTÁVEIS", name: "FOLHA DE ALUMÍNIO GRANDE", maxQty: "10", unit: "UN" },
+        { cat: "DESCARTÁVEIS", name: "PANO PERFEX ROLO", maxQty: "1", unit: "UN" },
+        { cat: "DESCARTÁVEIS", name: "FILME PVC", maxQty: "2", unit: "UN" },
+        { cat: "DESCARTÁVEIS", name: "PALITO DE DENTE GINA", maxQty: "6", unit: "UN" },
+        { cat: "DESCARTÁVEIS", name: "CARVÃO 3KG", maxQty: "6", unit: "UN" },
+        { cat: "DESCARTÁVEIS", name: "PALITO DE ESPETO", maxQty: "2", unit: "PCT" },
+        { cat: "DESCARTÁVEIS", name: "PANO DE PRATO", maxQty: "10", unit: "UN" },
+        { cat: "DESCARTÁVEIS", name: "PLÁSTICO CELOFANE P/ ASSAR", maxQty: "3", unit: "UN" },
+        // PRODUTOS DE LIMPEZA
+        { cat: "PRODUTOS DE LIMPEZA", name: "ÁGUA SANITÁRIA 2L", maxQty: "10", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "ÁLCOOL 92º 1L", maxQty: "3", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "ÁLCOOL EM GEL 500G", maxQty: "5", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "AMACIANTE DE ROUPAS 2L", maxQty: "10", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "BOM AR", maxQty: "4", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "LIMPA CASA PERFUMADO 500ML", maxQty: "6", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "DESINFETANTE 5L", maxQty: "8", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "DETERGENTE 500ML", maxQty: "2", unit: "CX" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "SABÃO LÍQUIDO ROUPA 5L", maxQty: "5", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "SABÃO EM PASTA", maxQty: "2", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "SABÃO DE COCO", maxQty: "3", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "ESPONJA DUPLA FACE", maxQty: "10", unit: "PCT" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "VEJA MULTIUSO 500ML", maxQty: "10", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "LUVA", maxQty: "10", unit: "PARES" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "BOMBRIL", maxQty: "10", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "VASSOURA PLÁSTICA", maxQty: "4", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "RODO", maxQty: "2", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "BALDE", maxQty: "2", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "LIMPA VIDRO", maxQty: "2", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "VEJA PERFUMADO 2L", maxQty: "6", unit: "UN" },
+        { cat: "PRODUTOS DE LIMPEZA", name: "SBP INSETOS", maxQty: "4", unit: "UN" },
+        // HIGIENE PESSOAL
+        { cat: "HIGIENE PESSOAL", name: "CREME DENTAL SORRISO", maxQty: "10", unit: "UN", note: "SOMENTE EQUIPE RS" },
+        { cat: "HIGIENE PESSOAL", name: "SABONETE PROTEX", maxQty: "16", unit: "UN", note: "SOMENTE EQUIPE RS" },
         // HORTI-FRUTI
-        { cat: "HORTI-FRUTI", name: "COUVE - FLOR", maxQty: "10", unit: "UNIDADES" },
+        { cat: "HORTI-FRUTI", name: "COUVE-FLOR", maxQty: "10", unit: "UN" },
         { cat: "HORTI-FRUTI", name: "PEPINO", maxQty: "5", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "ALHO KG", maxQty: "1", unit: "CX" },
-        { cat: "HORTI-FRUTI", name: "BATATA INGLESA KG", maxQty: "20", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "ALHO", maxQty: "1", unit: "CX" },
+        { cat: "HORTI-FRUTI", name: "BATATA INGLESA", maxQty: "20", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "BATATA DOCE", maxQty: "6", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "BETERRABA KG", maxQty: "3", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "CEBOLA KG", maxQty: "10", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "CENOURA KG", maxQty: "10", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "CHUCHU KG", maxQty: "3", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "AIPIM", maxQty: "10", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "BETERRABA", maxQty: "3", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "CEBOLA", maxQty: "10", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "CENOURA", maxQty: "10", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "CHUCHU", maxQty: "3", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "AIPIM / MANDIOCA", maxQty: "10", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "INHAME", maxQty: "4", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "PIMENTAO VERDE KG", maxQty: "6", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "TOMATE KG", maxQty: "15", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "CHEIRO VERDE", maxQty: "20", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "ABACAXI KG", maxQty: "10", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "XUXU", maxQty: "3", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "PIMENTÃO VERDE", maxQty: "6", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "TOMATE", maxQty: "15", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "CHEIRO VERDE", maxQty: "20", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "ABACAXI", maxQty: "10", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "CHUCHU / XUXU", maxQty: "3", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "QUIABO", maxQty: "6", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "ABOBORA MORANGA", maxQty: "2", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "ABOBORA VERDE", maxQty: "5", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "BANANA PRATA KG", maxQty: "10", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "ABÓBORA MORANGA", maxQty: "2", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "ABÓBORA VERDE", maxQty: "5", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "BANANA PRATA", maxQty: "10", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "BANANA DA TERRA", maxQty: "5", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "TANGERINA POKAN", maxQty: "10", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "LARANJA", maxQty: "20", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "MELANCIA", maxQty: "4", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "MAÇA NACIONAL KG", maxQty: "6", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "MAMAO  KG", maxQty: "3", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "ALFACE LISA KG", maxQty: "10", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "AGRIAO", maxQty: "5", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "COUVE", maxQty: "10", unit: "UNIDADES" },
+        { cat: "HORTI-FRUTI", name: "MELANCIA", maxQty: "4", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "MAÇÃ NACIONAL", maxQty: "6", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "MAMÃO", maxQty: "3", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "ALFACE LISA", maxQty: "10", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "AGRIÃO", maxQty: "5", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "COUVE", maxQty: "10", unit: "UN" },
         { cat: "HORTI-FRUTI", name: "LIMÃO", maxQty: "8", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "CEBOLINHA KG", maxQty: "5", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "COENTRO KG", maxQty: "8", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "SALSA KG", maxQty: "10", unit: "UNIDADES" },
+        { cat: "HORTI-FRUTI", name: "CEBOLINHA", maxQty: "5", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "COENTRO", maxQty: "8", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "SALSA", maxQty: "10", unit: "UN" },
         { cat: "HORTI-FRUTI", name: "OVOS BRANCOS GRANDE DZ", maxQty: "2", unit: "CX" },
-        { cat: "HORTI-FRUTI", name: "MARACUJA", maxQty: "5", unit: "KG" },
-        { cat: "HORTI-FRUTI", name: "MELÃO", maxQty: "8", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "UVA ITALIA OU VICTORIA", maxQty: "4", unit: "UNIDADES" },
-        { cat: "HORTI-FRUTI", name: "GENGIBRE", maxQty: "1", unit: "UNIDADE" },
+        { cat: "HORTI-FRUTI", name: "MARACUJÁ", maxQty: "5", unit: "KG" },
+        { cat: "HORTI-FRUTI", name: "MELÃO", maxQty: "8", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "UVA ITÁLIA / VICTÓRIA", maxQty: "4", unit: "UN" },
+        { cat: "HORTI-FRUTI", name: "GENGIBRE", maxQty: "1", unit: "UN" },
         { cat: "HORTI-FRUTI", name: "PERA", maxQty: "7", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "ABACATE", maxQty: "3", unit: "KG" },
-
         // FRIOS
-        { cat: "FRIOS", name: "SORVETE", maxQty: "10", unit: "UNIDADES" },
-        { cat: "FRIOS", name: "AÇAÍ 1,5", maxQty: "5", unit: "UNIDADES" },
-
+        { cat: "FRIOS", name: "SORVETE", maxQty: "10", unit: "UN" },
+        { cat: "FRIOS", name: "AÇAÍ 1,5L", maxQty: "5", unit: "UN" },
         // TEMPEROS
         { cat: "TEMPEROS", name: "SAL REFINADO 1KG", maxQty: "5", unit: "KG" },
         { cat: "TEMPEROS", name: "SAL GROSSO 1KG", maxQty: "4", unit: "KG" },
-        { cat: "TEMPEROS", name: "SAL DE PARRILHA", maxQty: "3", unit: "UNIDADES" },
-        { cat: "TEMPEROS", name: "TEMPERO CHIMICHURRI", maxQty: "8", unit: "PCT" },
-        { cat: "TEMPEROS", name: "TEMPERO BAIANO", maxQty: "8", unit: "UNIDADE" },
-        { cat: "TEMPEROS", name: "AÇAFRÃO", maxQty: "6", unit: "UNIDADE" },
+        { cat: "TEMPEROS", name: "SAL DE PARRILLA", maxQty: "3", unit: "UN" },
+        { cat: "TEMPEROS", name: "CHIMICHURRI", maxQty: "8", unit: "PCT" },
+        { cat: "TEMPEROS", name: "TEMPERO BAIANO", maxQty: "8", unit: "UN" },
+        { cat: "TEMPEROS", name: "AÇAFRÃO", maxQty: "6", unit: "UN" },
         { cat: "TEMPEROS", name: "COLORAU 800G", maxQty: "1", unit: "PCT" },
-        { cat: "TEMPEROS", name: "CALDO DE CARNE 1X6 UM", maxQty: "5", unit: "CX" },
-        { cat: "TEMPEROS", name: "CALDO DE LEGUMES 1X6 UM", maxQty: "5", unit: "CX" },
-        { cat: "TEMPEROS", name: "CALDO DE FRANGO 1X6 UM", maxQty: "5", unit: "CX" },
-        { cat: "TEMPEROS", name: "SAZON ( LIMÃO, NORDESTINO, CARNE )", maxQty: "3", unit: "PCT" },
-        { cat: "TEMPEROS", name: "LEMON PEPPER (30G / 10G )", maxQty: "5", unit: "PCT" },
-        { cat: "TEMPEROS", name: "PAPRICA DEFUMADA 10G", maxQty: "10", unit: "PCT" },
-        { cat: "TEMPEROS", name: "PIPENTA DO REINO 35G", maxQty: "4", unit: "UNIDADE" },
+        { cat: "TEMPEROS", name: "CALDO DE CARNE (CX 6 UN)", maxQty: "5", unit: "CX" },
+        { cat: "TEMPEROS", name: "CALDO DE LEGUMES (CX 6 UN)", maxQty: "5", unit: "CX" },
+        { cat: "TEMPEROS", name: "CALDO DE FRANGO (CX 6 UN)", maxQty: "5", unit: "CX" },
+        { cat: "TEMPEROS", name: "SAZON (LIMÃO, NORDESTINO, CARNE)", maxQty: "3", unit: "PCT" },
+        { cat: "TEMPEROS", name: "LEMON PEPPER 30G/10G", maxQty: "5", unit: "PCT" },
+        { cat: "TEMPEROS", name: "PÁPRICA DEFUMADA 10G", maxQty: "10", unit: "PCT" },
+        { cat: "TEMPEROS", name: "PIMENTA DO REINO 35G", maxQty: "4", unit: "UN" },
         { cat: "TEMPEROS", name: "LOURO EM FOLHA 40G", maxQty: "4", unit: "PCT" },
-        { cat: "TEMPEROS", name: "CRAVO DA INDIA 40G", maxQty: "1", unit: "PCT" },
-        { cat: "TEMPEROS", name: "NOZ MOSTADA EM PÓ 8G", maxQty: "1", unit: "PCT" },
+        { cat: "TEMPEROS", name: "CRAVO DA ÍNDIA 40G", maxQty: "1", unit: "PCT" },
+        { cat: "TEMPEROS", name: "NOZ-MOSCADA EM PÓ 8G", maxQty: "1", unit: "PCT" },
         { cat: "TEMPEROS", name: "CANELA EM PÓ", maxQty: "3", unit: "PCT" },
-        { cat: "TEMPEROS", name: "PIMENTA CALABRESA", maxQty: "5", unit: "UNIDADES" },
-        { cat: "TEMPEROS", name: "TEMPEIRO COMPLETO G", maxQty: "2", unit: "" }
+        { cat: "TEMPEROS", name: "PIMENTA CALABRESA", maxQty: "5", unit: "UN" },
+        { cat: "TEMPEROS", name: "TEMPERO COMPLETO", maxQty: "2", unit: "UN" },
     ];
 
-    // Agrupar por categoria mantendo ordem
-    const categories = [];
-    const categoryMap = new Map();
-    for (let item of itemsData) {
-        if (!categoryMap.has(item.cat)) {
-            categoryMap.set(item.cat, []);
-            categories.push(item.cat);
-        }
-        categoryMap.get(item.cat).push(item);
+    // ─────────────────────────────────────────────
+    // ESTADO
+    // ─────────────────────────────────────────────
+    let selectedVessel = null;
+    let checklistId = null;
+
+    function genId() {
+        const now = new Date();
+        const date = now.toLocaleDateString('pt-BR').replace(/\//g,'-');
+        const rand = Math.random().toString(36).substring(2,8).toUpperCase();
+        return `CKL-${date}-${rand}`;
     }
 
-    const container = document.getElementById('checklist-container');
-    let htmlString = '';
+    // ─────────────────────────────────────────────
+    // RENDERIZAR SELEÇÃO DE EMBARCAÇÕES
+    // ─────────────────────────────────────────────
+    const grid = document.getElementById('vessel-grid');
+    vessels.forEach((v, i) => {
+        const isAco = v.casco === 'Aço naval';
+        const card = document.createElement('label');
+        card.className = 'vessel-card';
+        card.innerHTML = `
+            <input type="radio" name="vessel" value="${i}">
+            <div class="vessel-info">
+                <div class="vessel-name">${v.name}</div>
+                <div class="vessel-meta">Ano: ${v.ano}${v.obs ? ' · ' + v.obs : ''}</div>
+            </div>
+            <span class="vessel-badge ${isAco ? 'badge-aco' : 'badge-madeira'}">${v.casco}</span>
+        `;
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.vessel-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedVessel = v;
+            document.getElementById('btn-start').disabled = false;
+        });
+        grid.appendChild(card);
+    });
 
-    for (let cat of categories) {
-        htmlString += `<div class="cat-header">${cat}</div>`;
-        const items = categoryMap.get(cat);
-        items.forEach((item, idx) => {
-            // Criar um ID único baseado em categoria + índice + aleatório
-            const uniqueId = `item_${cat.replace(/\s/g,'_')}_${idx}_${Math.random().toString(36).substring(2,6)}`;
-            // Nota opcional
-            const noteHtml = item.note ? `<span class="item-note">${item.note}</span>` : '';
-            htmlString += `
-            <div class="item-row" data-category="${cat}" data-maxqty="${item.maxQty}">
-                <input type="checkbox" class="item-checkbox" id="${uniqueId}">
-                <div class="item-content">
-                    <label for="${uniqueId}" class="item-name">${item.name}</label>
-                    <div class="item-details">
-                        <span class="max-qty-badge">Máx ${item.maxQty}</span>
-                        <span class="unit-badge">${item.unit || '—'}</span>
-                        <div class="qty-control">
-                            <button type="button" class="qty-down" aria-label="Diminuir">−</button>
-                            <span class="qty-value">0</span>
-                            <button type="button" class="qty-up" aria-label="Aumentar">+</button>
+    // ─────────────────────────────────────────────
+    // INICIAR CHECKLIST
+    // ─────────────────────────────────────────────
+    window.startChecklist = function() {
+        if (!selectedVessel) return;
+        checklistId = genId();
+
+        document.getElementById('vessel-screen').style.display = 'none';
+        document.getElementById('checklist-screen').style.display = 'block';
+
+        const now = new Date();
+        document.getElementById('banner-name').textContent = '⚓ ' + selectedVessel.name;
+        document.getElementById('banner-id').textContent = `ID: ${checklistId}  ·  Data: ${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+
+        buildChecklist();
+    };
+
+    window.changeVessel = function() {
+        document.getElementById('checklist-screen').style.display = 'none';
+        document.getElementById('vessel-screen').style.display = 'block';
+    };
+
+    // ─────────────────────────────────────────────
+    // CONSTRUIR CHECKLIST
+    // ─────────────────────────────────────────────
+    function buildChecklist() {
+        const categories = [];
+        const categoryMap = new Map();
+        for (let item of itemsData) {
+            if (!categoryMap.has(item.cat)) {
+                categoryMap.set(item.cat, []);
+                categories.push(item.cat);
+            }
+            categoryMap.get(item.cat).push(item);
+        }
+
+        const container = document.getElementById('checklist-container');
+        const catIcons = {
+            'CARNES': '🥩', 'PADARIA': '🍞', 'ALIMENTOS': '🛒',
+            'DESCARTÁVEIS': '🧻', 'PRODUTOS DE LIMPEZA': '🧹',
+            'HIGIENE PESSOAL': '🧴', 'HORTI-FRUTI': '🥦',
+            'FRIOS': '❄️', 'TEMPEROS': '🌿'
+        };
+        let html = '';
+
+        for (let cat of categories) {
+            const items = categoryMap.get(cat);
+            const icon = catIcons[cat] || '📦';
+            html += `<div class="cat-header">${icon} ${cat}<span class="cat-count">${items.length} itens</span></div>`;
+            items.forEach((item, idx) => {
+                const uid = `item_${cat.replace(/\W/g,'_')}_${idx}`;
+                const noteHtml = item.note ? `<span class="item-note">⚠ ${item.note}</span>` : '';
+                html += `
+                <div class="item-row" data-category="${cat}" data-maxqty="${item.maxQty}">
+                    <input type="checkbox" class="item-checkbox" id="${uid}">
+                    <div class="item-content">
+                        <label for="${uid}" class="item-name">${item.name}</label>
+                        <div class="item-details">
+                            <span class="max-qty-badge">Máx ${item.maxQty}</span>
+                            <span class="unit-badge">${item.unit || '—'}</span>
+                            <div class="qty-control">
+                                <button type="button" class="qty-down" aria-label="Diminuir">−</button>
+                                <span class="qty-value">0</span>
+                                <button type="button" class="qty-up" aria-label="Aumentar">+</button>
+                            </div>
+                            ${noteHtml}
                         </div>
-                        ${noteHtml}
                     </div>
-                </div>
-            </div>`;
-        });
-    }
-
-    container.innerHTML = htmlString;
-
-    // --------------------------------------------------------------
-    // LÓGICA DOS CONTROLES DE QUANTIDADE
-    // --------------------------------------------------------------
-    function updateQtyControls(itemRow) {
-        const max = parseInt(itemRow.dataset.maxqty, 10) || 0;
-        const qtySpan = itemRow.querySelector('.qty-value');
-        const downBtn = itemRow.querySelector('.qty-down');
-        const upBtn = itemRow.querySelector('.qty-up');
-        let current = parseInt(qtySpan.innerText, 10) || 0;
-
-        // Atualiza estado dos botões
-        downBtn.disabled = (current <= 0);
-        upBtn.disabled = (current >= max);
-    }
-
-    // Inicializa todos os controles
-    document.querySelectorAll('.item-row').forEach(row => {
-        const max = parseInt(row.dataset.maxqty, 10) || 0;
-        const qtySpan = row.querySelector('.qty-value');
-        qtySpan.innerText = '0'; // começar com 0
-        updateQtyControls(row);
-    });
-
-    // Event listeners para botões de quantidade
-    container.addEventListener('click', (e) => {
-        const target = e.target;
-        if (!target.classList.contains('qty-up') && !target.classList.contains('qty-down')) return;
-
-        const row = target.closest('.item-row');
-        if (!row) return;
-
-        const qtySpan = row.querySelector('.qty-value');
-        let current = parseInt(qtySpan.innerText, 10) || 0;
-        const max = parseInt(row.dataset.maxqty, 10) || 0;
-
-        if (target.classList.contains('qty-up')) {
-            if (current < max) {
-                qtySpan.innerText = current + 1;
-            }
-        } else if (target.classList.contains('qty-down')) {
-            if (current > 0) {
-                qtySpan.innerText = current - 1;
-            }
+                </div>`;
+            });
         }
 
-        updateQtyControls(row);
-    });
+        container.innerHTML = html;
+        initControls();
+    }
 
-    // Botão limpar: desmarca checkboxes e zera quantidades
-    document.getElementById('clear-all').addEventListener('click', function() {
+    // ─────────────────────────────────────────────
+    // CONTROLES
+    // ─────────────────────────────────────────────
+    function initControls() {
+        const total = document.querySelectorAll('.item-row').length;
+
         document.querySelectorAll('.item-row').forEach(row => {
-            const cb = row.querySelector('.item-checkbox');
-            if (cb) cb.checked = false;
-            const qtySpan = row.querySelector('.qty-value');
-            if (qtySpan) qtySpan.innerText = '0';
-            updateQtyControls(row);
+            const max = parseInt(row.dataset.maxqty, 10) || 0;
+            updateQty(row);
+
+            row.querySelector('.item-checkbox').addEventListener('change', updateProgress);
         });
-    });
 
-    // Geração de PDF
-    document.getElementById('generate-pdf').addEventListener('click', function() {
+        document.getElementById('checklist-container').addEventListener('click', e => {
+            const t = e.target;
+            if (!t.classList.contains('qty-up') && !t.classList.contains('qty-down')) return;
+            const row = t.closest('.item-row');
+            if (!row) return;
+            const span = row.querySelector('.qty-value');
+            let cur = parseInt(span.textContent, 10) || 0;
+            const max = parseInt(row.dataset.maxqty, 10) || 0;
+            if (t.classList.contains('qty-up') && cur < max) span.textContent = cur + 1;
+            if (t.classList.contains('qty-down') && cur > 0) span.textContent = cur - 1;
+            updateQty(row);
+        });
+
+        document.getElementById('clear-all').onclick = () => {
+            document.querySelectorAll('.item-row').forEach(row => {
+                row.querySelector('.item-checkbox').checked = false;
+                row.querySelector('.qty-value').textContent = '0';
+                updateQty(row);
+            });
+            updateProgress();
+        };
+
+        document.getElementById('generate-pdf').onclick = generatePDF;
+        updateProgress();
+
+        function updateProgress() {
+            const checked = document.querySelectorAll('.item-checkbox:checked').length;
+            const pct = total > 0 ? (checked / total * 100) : 0;
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-label').textContent = `${checked} de ${total} itens selecionados`;
+        }
+    }
+
+    function updateQty(row) {
+        const max = parseInt(row.dataset.maxqty, 10) || 0;
+        const cur = parseInt(row.querySelector('.qty-value').textContent, 10) || 0;
+        row.querySelector('.qty-down').disabled = cur <= 0;
+        row.querySelector('.qty-up').disabled = cur >= max;
+    }
+
+    // ─────────────────────────────────────────────
+    // GERAÇÃO DO PDF NAVAL
+    // ─────────────────────────────────────────────
+    function generatePDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text('Checklist de Rancho - Solicitação', 14, 20);
-        doc.setFontSize(10);
-        doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 28);
 
-        // Coletar itens marcados, agrupados por categoria
         const selectedByCat = new Map();
+        let totalItems = 0;
+
         document.querySelectorAll('.item-row').forEach(row => {
             const cb = row.querySelector('.item-checkbox');
             if (!cb || !cb.checked) return;
-
             const cat = row.dataset.category;
-            const name = row.querySelector('.item-name').innerText;
-            const qty = row.querySelector('.qty-value').innerText;
-            const unit = row.querySelector('.unit-badge').innerText;
-            const noteElem = row.querySelector('.item-note');
-            const note = noteElem ? noteElem.innerText : '';
-
+            const name = row.querySelector('.item-name').textContent.trim();
+            const qty = row.querySelector('.qty-value').textContent;
+            const unit = row.querySelector('.unit-badge').textContent;
+            const noteEl = row.querySelector('.item-note');
+            const note = noteEl ? noteEl.textContent.replace('⚠ ','').trim() : '';
             if (!selectedByCat.has(cat)) selectedByCat.set(cat, []);
             selectedByCat.get(cat).push({ name, qty, unit, note });
+            totalItems++;
         });
 
         if (selectedByCat.size === 0) {
-            alert('Nenhum item selecionado.');
+            alert('Nenhum item selecionado para gerar o PDF.');
             return;
         }
 
-        // Montar tabela por categoria
-        let finalY = 35;
-        selectedByCat.forEach((items, cat) => {
-            // Adicionar cabeçalho da categoria
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text(cat, 14, finalY);
-            doc.setFont(undefined, 'normal');
-            finalY += 6;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const W = 210, H = 297;
+        const margin = 14;
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('pt-BR');
+        const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            // Dados da tabela
-            const body = items.map(item => {
-                const noteText = item.note ? ` (${item.note})` : '';
-                return [item.name, `${item.qty} ${item.unit}${noteText}`];
+        // ── FUNÇÃO CABEÇALHO DE PÁGINA ──
+        function drawPageHeader(pageNum, totalPages) {
+            // Fundo topo navy
+            doc.setFillColor(10, 37, 64);
+            doc.rect(0, 0, W, 42, 'F');
+
+            // Faixa dourada decorativa
+            doc.setFillColor(244, 168, 35);
+            doc.rect(0, 42, W, 3, 'F');
+
+            // Título principal
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(18);
+            doc.setTextColor(255, 255, 255);
+            doc.text('CHECKLIST DE RANCHO', margin, 16);
+
+            // Subtítulo embarcação
+            doc.setFontSize(11);
+            doc.setTextColor(244, 168, 35);
+            doc.text(selectedVessel.name, margin, 24);
+
+            // Info direita
+            doc.setFontSize(7.5);
+            doc.setTextColor(180, 200, 220);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Data: ${dateStr}  ${timeStr}`, W - margin, 14, { align: 'right' });
+            doc.text(`ID: ${checklistId}`, W - margin, 20, { align: 'right' });
+            doc.text(`Casco: ${selectedVessel.casco}`, W - margin, 26, { align: 'right' });
+            doc.text(`Pág. ${pageNum} / ${totalPages}`, W - margin, 32, { align: 'right' });
+
+            // Linha de status
+            doc.setFontSize(7.5);
+            doc.setTextColor(140, 170, 200);
+            doc.text(`${totalItems} produto(s) selecionado(s)  ·  ${selectedByCat.size} categoria(s)`, margin, 35);
+        }
+
+        // ── RODAPÉ ──
+        function drawPageFooter() {
+            doc.setFillColor(10, 37, 64);
+            doc.rect(0, H - 14, W, 14, 'F');
+            doc.setFontSize(7);
+            doc.setTextColor(120, 150, 180);
+            doc.setFont('helvetica', 'normal');
+            doc.text('DOCUMENTO INTERNO · CONTROLE DE SUPRIMENTOS NAVAIS', W / 2, H - 6, { align: 'center' });
+        }
+
+        // ── PRÉ-CALCULAR PÁGINAS ESTIMADAS ──
+        // Vamos usar 1 passagem real e depois atualizar
+        let currentY = 52;
+        let pageCount = 1;
+
+        // Simular para contar páginas (rápido)
+        let simY = 52;
+        let simPages = 1;
+        selectedByCat.forEach((items) => {
+            simY += 10; // cat header
+            const rowH = items.length * 7 + 14; // approx autoTable height
+            if (simY + rowH > H - 22) { simPages++; simY = 52; }
+            simY += rowH + 6;
+        });
+        const totalPages = simPages;
+
+        // ── RENDERIZAR ──
+        drawPageHeader(1, totalPages);
+        drawPageFooter();
+        currentY = 52;
+        let currentPage = 1;
+
+        // Cor por categoria
+        const catColors = {
+            'CARNES':              [120, 30, 30],
+            'PADARIA':             [120, 80, 20],
+            'ALIMENTOS':           [20, 80, 120],
+            'DESCARTÁVEIS':        [60, 60, 110],
+            'PRODUTOS DE LIMPEZA': [20, 100, 70],
+            'HIGIENE PESSOAL':     [100, 40, 100],
+            'HORTI-FRUTI':         [40, 110, 40],
+            'FRIOS':               [20, 100, 130],
+            'TEMPEROS':            [100, 70, 10],
+        };
+
+        selectedByCat.forEach((items, cat) => {
+            const catColor = catColors[cat] || [40, 60, 90];
+
+            // Verificar se precisa nova página para cabeçalho da categoria + pelo menos 1 linha
+            if (currentY + 30 > H - 22) {
+                currentPage++;
+                doc.addPage();
+                drawPageHeader(currentPage, totalPages);
+                drawPageFooter();
+                currentY = 52;
+            }
+
+            // Cabeçalho da categoria (pill colorido)
+            doc.setFillColor(...catColor);
+            doc.roundedRect(margin, currentY, W - margin * 2, 9, 2, 2, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8.5);
+            doc.setTextColor(255, 255, 255);
+            doc.text(cat, margin + 4, currentY + 6.2);
+            doc.setFontSize(7.5);
+            doc.text(`${items.length} item(ns)`, W - margin - 4, currentY + 6.2, { align: 'right' });
+            currentY += 11;
+
+            // Tabela de itens
+            const body = items.map((item, i) => {
+                const rowBg = i % 2 === 0 ? [248, 250, 253] : [255, 255, 255];
+                return [
+                    { content: item.name + (item.note ? `\n⚠ ${item.note}` : ''), styles: { fontStyle: item.note ? 'italic' : 'normal' } },
+                    { content: item.qty, styles: { halign: 'center', fontStyle: 'bold' } },
+                    { content: item.unit, styles: { halign: 'center' } },
+                ];
             });
 
             doc.autoTable({
-                startY: finalY,
-                head: [['Produto', 'Quantidade']],
+                startY: currentY,
+                head: [[
+                    { content: 'PRODUTO', styles: { halign: 'left' } },
+                    { content: 'QTD', styles: { halign: 'center' } },
+                    { content: 'UNIDADE', styles: { halign: 'center' } },
+                ]],
                 body: body,
-                theme: 'striped',
-                headStyles: { fillColor: [11, 57, 84] },
-                margin: { left: 14, right: 14 },
+                theme: 'grid',
+                margin: { left: margin, right: margin },
+                columnStyles: {
+                    0: { cellWidth: 'auto', fontSize: 8.5 },
+                    1: { cellWidth: 20, fontSize: 9, halign: 'center' },
+                    2: { cellWidth: 22, fontSize: 8.5, halign: 'center' },
+                },
+                headStyles: {
+                    fillColor: catColor,
+                    textColor: [255, 255, 255],
+                    fontSize: 7.5,
+                    fontStyle: 'bold',
+                    cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+                },
+                bodyStyles: {
+                    fontSize: 8.5,
+                    cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 },
+                    textColor: [22, 41, 61],
+                    lineColor: [210, 220, 232],
+                    lineWidth: 0.3,
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 249, 253],
+                },
                 didDrawPage: (data) => {
-                    finalY = data.cursor.y + 6;
-                }
+                    // Redraw header/footer on new pages created by autoTable
+                    if (data.pageNumber > currentPage) {
+                        currentPage = data.pageNumber;
+                        drawPageHeader(currentPage, totalPages);
+                        drawPageFooter();
+                    }
+                },
+                showHead: 'firstPage',
             });
-            finalY = doc.lastAutoTable.finalY + 8;
+
+            currentY = doc.lastAutoTable.finalY + 5;
         });
 
-        doc.save('checklist_rancho.pdf');
-    });
+        // ── SUMÁRIO FINAL ──
+        if (currentY + 30 > H - 22) {
+            currentPage++;
+            doc.addPage();
+            drawPageHeader(currentPage, totalPages);
+            drawPageFooter();
+            currentY = 52;
+        }
+
+        // Caixa de resumo
+        doc.setFillColor(10, 37, 64);
+        doc.roundedRect(margin, currentY, W - margin * 2, 22, 3, 3, 'F');
+        doc.setFillColor(244, 168, 35);
+        doc.rect(margin, currentY + 19, W - margin * 2, 3, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        doc.text('RESUMO DA SOLICITAÇÃO', margin + 5, currentY + 7);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(180, 210, 230);
+        doc.text(`Embarcação: ${selectedVessel.name}   ·   Casco: ${selectedVessel.casco}   ·   Total: ${totalItems} produto(s)   ·   ID: ${checklistId}`, margin + 5, currentY + 14);
+
+        // Assinatura
+        currentY += 32;
+        doc.setDrawColor(180, 200, 215);
+        doc.setLineWidth(0.5);
+        doc.line(margin, currentY, margin + 70, currentY);
+        doc.line(W - margin - 70, currentY, W - margin, currentY);
+        doc.setFontSize(7.5);
+        doc.setTextColor(120, 150, 180);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Responsável pelo Rancho', margin, currentY + 5);
+        doc.text('Aprovação / Mestre', W - margin - 70, currentY + 5);
+        doc.setFontSize(7);
+        doc.text('Assinatura e Data', margin, currentY + 10);
+        doc.text('Assinatura e Data', W - margin - 70, currentY + 10);
+
+        doc.save(`rancho_${selectedVessel.name.replace(/\s+/g,'_')}_${checklistId}.pdf`);
+    }
+
 })();
 </script>
 </body>
