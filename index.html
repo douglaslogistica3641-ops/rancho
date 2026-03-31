@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -881,7 +882,7 @@
             const span = row.querySelector('.qty-value');
             let cur = parseInt(span.textContent, 10) || 0;
             const max = parseInt(row.dataset.maxqty, 10) || 0;
-            if (t.classList.contains('qty-up') && cur < max) span.textContent = cur + 1;
+            if (t.classList.contains('qty-up')) span.textContent = cur + 1;
             if (t.classList.contains('qty-down') && cur > 0) span.textContent = cur - 1;
             updateQty(row);
         });
@@ -910,7 +911,7 @@
         const max = parseInt(row.dataset.maxqty, 10) || 0;
         const cur = parseInt(row.querySelector('.qty-value').textContent, 10) || 0;
         row.querySelector('.qty-down').disabled = cur <= 0;
-        row.querySelector('.qty-up').disabled = cur >= max;
+        row.querySelector('.qty-up').disabled = false;
     }
 
     // ─────────────────────────────────────────────
