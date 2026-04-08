@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -128,10 +129,7 @@
             position: relative;
         }
 
-        .vessel-card:hover {
-            border-color: var(--blue);
-            background: var(--sky);
-        }
+        .vessel-card:hover { border-color: var(--blue); background: var(--sky); }
 
         .vessel-card.selected {
             border-color: var(--navy);
@@ -210,7 +208,6 @@
             gap: 12px;
         }
 
-        .vessel-banner-info {}
         .vessel-banner-name {
             font-family: 'Barlow Condensed', sans-serif;
             font-size: 1.25rem;
@@ -239,9 +236,7 @@
         }
         .btn-change-vessel:hover { background: rgba(255,255,255,0.22); }
 
-        .checklist-body {
-            padding: 16px 16px 30px;
-        }
+        .checklist-body { padding: 16px 16px 30px; }
 
         .progress-bar-wrap {
             background: var(--gray);
@@ -264,11 +259,76 @@
             font-weight: 500;
         }
 
+        /* ── SEARCH BAR ── */
+        .search-bar {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 11px 16px 11px 40px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.92rem;
+            color: var(--text);
+            background: var(--gray);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-bar input:focus { border-color: var(--blue); background: var(--white); }
+        .search-bar input::placeholder { color: var(--muted); }
+        .search-bar .search-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            color: var(--muted);
+            pointer-events: none;
+        }
+        .search-bar .search-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            color: var(--muted);
+            cursor: pointer;
+            display: none;
+            padding: 4px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .toolbar button {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--muted);
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .toolbar button:hover { border-color: var(--blue); color: var(--blue); }
+        .toolbar button.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+        /* ── COLLAPSIBLE CATEGORY ── */
         .cat-header {
             background: var(--navy);
             color: var(--white);
-            padding: 11px 16px;
-            margin: 16px 0 6px;
+            padding: 12px 16px;
+            margin: 12px 0 0;
             border-radius: 10px;
             font-family: 'Barlow Condensed', sans-serif;
             font-weight: 700;
@@ -277,10 +337,37 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s, border-radius 0.2s;
+        }
+        .cat-header:hover { background: var(--navy2); }
+        .cat-header.open { border-radius: 10px 10px 0 0; }
+
+        .cat-header .cat-arrow {
+            margin-left: auto;
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+            opacity: 0.7;
+        }
+        .cat-header.open .cat-arrow { transform: rotate(180deg); }
+
+        .cat-fill-badge {
+            font-size: 0.72rem;
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-family: 'Barlow', sans-serif;
+            font-weight: 700;
+            background: rgba(255,255,255,0.15);
+            white-space: nowrap;
+            transition: background 0.3s, color 0.3s;
+        }
+        .cat-fill-badge.has-items {
+            background: var(--gold);
+            color: var(--navy);
         }
 
         .cat-count {
-            margin-left: auto;
             font-size: 0.75rem;
             background: rgba(255,255,255,0.15);
             padding: 2px 8px;
@@ -289,11 +376,29 @@
             font-weight: 600;
         }
 
+        .cat-items-wrap {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+            border-left: 2px solid var(--border);
+            border-right: 2px solid var(--border);
+            margin: 0 2px;
+        }
+        .cat-items-wrap.open {
+            max-height: 9999px;
+            border-bottom: 2px solid var(--border);
+            border-radius: 0 0 10px 10px;
+        }
+
+        .cat-items-inner {
+            padding: 6px 8px 8px;
+        }
+
         .item-row {
             display: flex;
             align-items: flex-start;
             gap: 12px;
-            padding: 12px 12px;
+            padding: 10px 10px;
             margin: 4px 0;
             background: #fafbfd;
             border-radius: 10px;
@@ -307,6 +412,7 @@
             background: var(--green-bg);
             border-color: #5cb88a;
         }
+        .item-row.hidden { display: none; }
 
         .item-row input[type="checkbox"] {
             width: 22px; height: 22px;
@@ -316,13 +422,14 @@
             cursor: pointer;
         }
 
-        .item-content { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+        .item-content { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
         .item-name {
             font-weight: 600;
-            font-size: 0.97rem;
+            font-size: 0.95rem;
             color: var(--text);
             line-height: 1.3;
+            cursor: pointer;
         }
 
         .item-row:has(:checked) .item-name {
@@ -343,7 +450,7 @@
             font-weight: 700;
             padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
         }
 
         .unit-badge {
@@ -351,7 +458,7 @@
             color: var(--muted);
             padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 500;
         }
 
@@ -388,13 +495,27 @@
         }
 
         .item-note {
-            font-size: 0.75rem;
+            font-size: 0.73rem;
             color: #92400e;
             background: #fef3c7;
             padding: 2px 10px;
             border-radius: 20px;
             font-weight: 600;
         }
+
+        /* ── QUICK QTY (max button) ── */
+        .btn-max-qty {
+            background: none;
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-max-qty:hover { border-color: var(--blue); color: var(--blue); }
 
         .action-buttons {
             display: flex;
@@ -441,12 +562,40 @@
             border-top: 1px dashed var(--border);
             padding-top: 14px;
         }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--navy);
+            color: var(--white);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.35s ease;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ── NO RESULTS ── */
+        .no-results {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
 <div class="app-wrapper">
 
-    <!-- HEADER -->
     <div class="app-header">
         <div class="header-emblem">
             <div class="anchor-icon">⚓</div>
@@ -457,19 +606,13 @@
         </div>
     </div>
 
-    <!-- VESSEL SELECTION -->
     <div id="vessel-screen">
         <p class="vessel-screen-title">Selecione a Embarcação</p>
         <p class="vessel-screen-sub">Escolha a embarcação para iniciar o checklist de rancho.</p>
-
         <div class="vessel-grid" id="vessel-grid"></div>
-
-        <button class="btn-start" id="btn-start" disabled onclick="startChecklist()">
-            ⚓ Iniciar Checklist
-        </button>
+        <button class="btn-start" id="btn-start" disabled onclick="startChecklist()">⚓ Iniciar Checklist</button>
     </div>
 
-    <!-- CHECKLIST -->
     <div id="checklist-screen">
         <div class="vessel-banner">
             <div class="vessel-banner-info">
@@ -485,7 +628,21 @@
                 <div class="progress-bar-fill" id="progress-fill"></div>
             </div>
 
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Buscar produto..." autocomplete="off">
+                <button class="search-clear" id="search-clear" type="button">✕</button>
+            </div>
+
+            <div class="toolbar">
+                <button id="filter-all" class="active">Todos</button>
+                <button id="filter-filled">Preenchidos</button>
+                <button id="btn-expand-all">Expandir Tudo</button>
+                <button id="btn-collapse-all">Recolher Tudo</button>
+            </div>
+
             <div id="checklist-container"></div>
+            <div class="no-results" id="no-results">Nenhum produto encontrado.</div>
 
             <div class="action-buttons">
                 <button class="btn-action btn-clear" id="clear-all">🗑 Limpar</button>
@@ -493,19 +650,18 @@
             </div>
 
             <div class="footer-note">
-                Marque os itens e ajuste as quantidades (máximo indicado por embarcação).
+                Marque os itens e ajuste as quantidades. Ao aumentar a quantidade, o item é selecionado automaticamente.
             </div>
         </div>
     </div>
 
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 (function() {
 
-    // ─────────────────────────────────────────────
-    // DADOS DAS EMBARCAÇÕES
-    // ─────────────────────────────────────────────
     const vessels = [
         { name: "RS CÓRREGO DO OURO", ano: 2024, casco: "Aço naval",   obs: "Academia, Starlink, molinete 7t" },
         { name: "RS FRADE",           ano: 2023, casco: "Aço naval",   obs: "" },
@@ -520,11 +676,7 @@
         { name: "RS MARIA DO CARMO",  ano: 2010, casco: "Madeira",     obs: "" },
     ];
 
-    // ─────────────────────────────────────────────
-    // ITENS DO CHECKLIST
-    // ─────────────────────────────────────────────
     const itemsData = [
-        // CARNES
         { cat: "CARNES", name: "LAGARTO BOVINO", maxQty: "5", unit: "KG" },
         { cat: "CARNES", name: "PATINHO BOVINO (PICADINHO)", maxQty: "10", unit: "KG" },
         { cat: "CARNES", name: "ALCATRA C/ BOVINA", maxQty: "25", unit: "KG" },
@@ -559,7 +711,6 @@
         { cat: "CARNES", name: "BARRIGA SUÍNA", maxQty: "10", unit: "KG" },
         { cat: "CARNES", name: "CHULETA BOVINA", maxQty: "8", unit: "KG" },
         { cat: "CARNES", name: "BATATA PRÉ-FRITA CONGELADA 2KG", maxQty: "5", unit: "PCT" },
-        // PADARIA
         { cat: "PADARIA", name: "MORTADELA FATIADA", maxQty: "2", unit: "KG" },
         { cat: "PADARIA", name: "PRESUNTO COZIDO FATIADO", maxQty: "7", unit: "KG" },
         { cat: "PADARIA", name: "QUEIJO MUSSARELA FATIADO", maxQty: "10", unit: "KG" },
@@ -585,7 +736,6 @@
         { cat: "PADARIA", name: "CATUPIRY (MARCA CATUPIRY)", maxQty: "2", unit: "BISNAGA" },
         { cat: "PADARIA", name: "CREME CHEESE", maxQty: "2", unit: "BISNAGA" },
         { cat: "PADARIA", name: "QUEIJO COALHO", maxQty: "5", unit: "PCT" },
-        // ALIMENTOS
         { cat: "ALIMENTOS", name: "TAPIOCA 500G", maxQty: "6", unit: "UN" },
         { cat: "ALIMENTOS", name: "EXTRATO DE TOMATE 300G", maxQty: "14", unit: "UN" },
         { cat: "ALIMENTOS", name: "MACARRÃO ESPAGUETE 500G", maxQty: "10", unit: "UN" },
@@ -596,16 +746,15 @@
         { cat: "ALIMENTOS", name: "AÇÚCAR CRISTAL", maxQty: "10", unit: "KG" },
         { cat: "ALIMENTOS", name: "AÇÚCAR MASCAVO", maxQty: "3", unit: "UN" },
         { cat: "ALIMENTOS", name: "ARROZ BRANCO TIPO 1", maxQty: "30", unit: "KG" },
-        { cat: "ALIMENTOS", name: "PÓ DE CAFÉ PILÃO / MELITTA", maxQty: "12", unit: "KG" },
-        { cat: "ALIMENTOS", name: "CAFÉ GOURMET (CAFETEIRA)", maxQty: "2", unit: "KG" },
-        { cat: "ALIMENTOS", name: "FARINHA DE TRIGO 5KG", maxQty: "3", unit: "PCT" },
+        { cat: "ALIMENTOS", name: "PÓ DE CAFÉ", maxQty: "12", unit: "KG" },
+        { cat: "ALIMENTOS", name: "FARINHA DE TRIGO", maxQty: "3", unit: "PCT" },
         { cat: "ALIMENTOS", name: "FARINHA DE MANDIOCA 1KG", maxQty: "4", unit: "PCT" },
         { cat: "ALIMENTOS", name: "FUBÁ MIMOSO 1KG", maxQty: "2", unit: "UN" },
         { cat: "ALIMENTOS", name: "FERMENTO BIOLÓGICO", maxQty: "4", unit: "UN" },
         { cat: "ALIMENTOS", name: "LEITE DE COCO 500G", maxQty: "6", unit: "UN" },
         { cat: "ALIMENTOS", name: "FEIJÃO PRETO", maxQty: "20", unit: "KG" },
         { cat: "ALIMENTOS", name: "FEIJÃO BRANCO", maxQty: "3", unit: "KG" },
-        { cat: "ALIMENTOS", name: "NESCAU LATA 400G", maxQty: "3", unit: "UN" },
+        { cat: "ALIMENTOS", name: "ACHOLATADO LATA 400G", maxQty: "3", unit: "UN" },
         { cat: "ALIMENTOS", name: "ÓLEO DE SOJA 900ML", maxQty: "24", unit: "UN" },
         { cat: "ALIMENTOS", name: "GELATINA ABACAXI / MORANGO / LIMÃO", maxQty: "12", unit: "UN" },
         { cat: "ALIMENTOS", name: "AVEIA NATURAL 1KG", maxQty: "2", unit: "UN" },
@@ -642,7 +791,6 @@
         { cat: "ALIMENTOS", name: "MEL DE ABELHA", maxQty: "2", unit: "UN" },
         { cat: "ALIMENTOS", name: "CREME DE CEBOLA", maxQty: "1", unit: "FD" },
         { cat: "ALIMENTOS", name: "CANJICA", maxQty: "4", unit: "UN" },
-        // DESCARTÁVEIS
         { cat: "DESCARTÁVEIS", name: "COPO DESCARTÁVEL 200ML CX/100", maxQty: "2", unit: "CX" },
         { cat: "DESCARTÁVEIS", name: "PAPEL HIGIÊNICO 12 UN", maxQty: "6", unit: "PCT" },
         { cat: "DESCARTÁVEIS", name: "PAPEL TOALHA P/ FRITURA", maxQty: "10", unit: "PCT" },
@@ -655,7 +803,6 @@
         { cat: "DESCARTÁVEIS", name: "PALITO DE ESPETO", maxQty: "2", unit: "PCT" },
         { cat: "DESCARTÁVEIS", name: "PANO DE PRATO", maxQty: "10", unit: "UN" },
         { cat: "DESCARTÁVEIS", name: "PLÁSTICO CELOFANE P/ ASSAR", maxQty: "3", unit: "UN" },
-        // PRODUTOS DE LIMPEZA
         { cat: "PRODUTOS DE LIMPEZA", name: "ÁGUA SANITÁRIA 2L", maxQty: "10", unit: "UN" },
         { cat: "PRODUTOS DE LIMPEZA", name: "ÁLCOOL 92º 1L", maxQty: "3", unit: "UN" },
         { cat: "PRODUTOS DE LIMPEZA", name: "ÁLCOOL EM GEL 500G", maxQty: "5", unit: "UN" },
@@ -677,10 +824,8 @@
         { cat: "PRODUTOS DE LIMPEZA", name: "LIMPA VIDRO", maxQty: "2", unit: "UN" },
         { cat: "PRODUTOS DE LIMPEZA", name: "VEJA PERFUMADO 2L", maxQty: "6", unit: "UN" },
         { cat: "PRODUTOS DE LIMPEZA", name: "SBP INSETOS", maxQty: "4", unit: "UN" },
-        // HIGIENE PESSOAL
         { cat: "HIGIENE PESSOAL", name: "CREME DENTAL SORRISO", maxQty: "10", unit: "UN", note: "SOMENTE EQUIPE RS" },
         { cat: "HIGIENE PESSOAL", name: "SABONETE PROTEX", maxQty: "16", unit: "UN", note: "SOMENTE EQUIPE RS" },
-        // HORTI-FRUTI
         { cat: "HORTI-FRUTI", name: "COUVE-FLOR", maxQty: "10", unit: "UN" },
         { cat: "HORTI-FRUTI", name: "PEPINO", maxQty: "5", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "ALHO", maxQty: "1", unit: "CX" },
@@ -721,10 +866,9 @@
         { cat: "HORTI-FRUTI", name: "GENGIBRE", maxQty: "1", unit: "UN" },
         { cat: "HORTI-FRUTI", name: "PERA", maxQty: "7", unit: "KG" },
         { cat: "HORTI-FRUTI", name: "ABACATE", maxQty: "3", unit: "KG" },
-        // FRIOS
         { cat: "FRIOS", name: "SORVETE", maxQty: "10", unit: "UN" },
         { cat: "FRIOS", name: "AÇAÍ 1,5L", maxQty: "5", unit: "UN" },
-        // TEMPEROS
+        { cat: "FRIOS", name: "POLPA DE FRUTAS", maxQty: "20", unit: "UN" },
         { cat: "TEMPEROS", name: "SAL REFINADO 1KG", maxQty: "5", unit: "KG" },
         { cat: "TEMPEROS", name: "SAL GROSSO 1KG", maxQty: "4", unit: "KG" },
         { cat: "TEMPEROS", name: "SAL DE PARRILLA", maxQty: "3", unit: "UN" },
@@ -747,11 +891,9 @@
         { cat: "TEMPEROS", name: "TEMPERO COMPLETO", maxQty: "2", unit: "UN" },
     ];
 
-    // ─────────────────────────────────────────────
-    // ESTADO
-    // ─────────────────────────────────────────────
     let selectedVessel = null;
     let checklistId = null;
+    let currentFilter = 'all'; // 'all' or 'filled'
 
     function genId() {
         const now = new Date();
@@ -760,9 +902,14 @@
         return `CKL-${date}-${rand}`;
     }
 
-    // ─────────────────────────────────────────────
-    // RENDERIZAR SELEÇÃO DE EMBARCAÇÕES
-    // ─────────────────────────────────────────────
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ── VESSEL SELECTION ──
     const grid = document.getElementById('vessel-grid');
     vessels.forEach((v, i) => {
         const isAco = v.casco === 'Aço naval';
@@ -785,20 +932,14 @@
         grid.appendChild(card);
     });
 
-    // ─────────────────────────────────────────────
-    // INICIAR CHECKLIST
-    // ─────────────────────────────────────────────
     window.startChecklist = function() {
         if (!selectedVessel) return;
         checklistId = genId();
-
         document.getElementById('vessel-screen').style.display = 'none';
         document.getElementById('checklist-screen').style.display = 'block';
-
         const now = new Date();
         document.getElementById('banner-name').textContent = '⚓ ' + selectedVessel.name;
         document.getElementById('banner-id').textContent = `ID: ${checklistId}  ·  Data: ${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
-
         buildChecklist();
     };
 
@@ -807,9 +948,7 @@
         document.getElementById('vessel-screen').style.display = 'block';
     };
 
-    // ─────────────────────────────────────────────
-    // CONSTRUIR CHECKLIST
-    // ─────────────────────────────────────────────
+    // ── BUILD CHECKLIST ──
     function buildChecklist() {
         const categories = [];
         const categoryMap = new Map();
@@ -833,12 +972,18 @@
         for (let cat of categories) {
             const items = categoryMap.get(cat);
             const icon = catIcons[cat] || '📦';
-            html += `<div class="cat-header">${icon} ${cat}<span class="cat-count">${items.length} itens</span></div>`;
+            const catId = cat.replace(/\W/g, '_');
+            html += `<div class="cat-header" data-cat="${catId}" onclick="toggleCat('${catId}')">
+                ${icon} ${cat}
+                <span class="cat-fill-badge" id="fill-${catId}">0 de ${items.length}</span>
+                <span class="cat-arrow">▼</span>
+            </div>`;
+            html += `<div class="cat-items-wrap" id="wrap-${catId}"><div class="cat-items-inner">`;
             items.forEach((item, idx) => {
-                const uid = `item_${cat.replace(/\W/g,'_')}_${idx}`;
+                const uid = `item_${catId}_${idx}`;
                 const noteHtml = item.note ? `<span class="item-note">⚠ ${item.note}</span>` : '';
                 html += `
-                <div class="item-row" data-category="${cat}" data-maxqty="${item.maxQty}">
+                <div class="item-row" data-category="${cat}" data-maxqty="${item.maxQty}" data-name="${item.name.toLowerCase()}">
                     <input type="checkbox" class="item-checkbox" id="${uid}">
                     <div class="item-content">
                         <label for="${uid}" class="item-name">${item.name}</label>
@@ -850,43 +995,85 @@
                                 <span class="qty-value">0</span>
                                 <button type="button" class="qty-up" aria-label="Aumentar">+</button>
                             </div>
+                            <button type="button" class="btn-max-qty" title="Preencher máximo">Máx</button>
                             ${noteHtml}
                         </div>
                     </div>
                 </div>`;
             });
+            html += `</div></div>`;
         }
 
         container.innerHTML = html;
         initControls();
     }
 
-    // ─────────────────────────────────────────────
-    // CONTROLES
-    // ─────────────────────────────────────────────
+    // ── TOGGLE CATEGORY ──
+    window.toggleCat = function(catId) {
+        const header = document.querySelector(`.cat-header[data-cat="${catId}"]`);
+        const wrap = document.getElementById('wrap-' + catId);
+        header.classList.toggle('open');
+        wrap.classList.toggle('open');
+    };
+
+    // ── CONTROLS ──
     function initControls() {
         const total = document.querySelectorAll('.item-row').length;
 
-        document.querySelectorAll('.item-row').forEach(row => {
-            const max = parseInt(row.dataset.maxqty, 10) || 0;
-            updateQty(row);
-
-            row.querySelector('.item-checkbox').addEventListener('change', updateProgress);
-        });
-
+        // Qty buttons via delegation
         document.getElementById('checklist-container').addEventListener('click', e => {
             const t = e.target;
-            if (!t.classList.contains('qty-up') && !t.classList.contains('qty-down')) return;
             const row = t.closest('.item-row');
             if (!row) return;
-            const span = row.querySelector('.qty-value');
-            let cur = parseInt(span.textContent, 10) || 0;
-            const max = parseInt(row.dataset.maxqty, 10) || 0;
-            if (t.classList.contains('qty-up')) span.textContent = cur + 1;
-            if (t.classList.contains('qty-down') && cur > 0) span.textContent = cur - 1;
-            updateQty(row);
+
+            if (t.classList.contains('qty-up') || t.classList.contains('qty-down')) {
+                const span = row.querySelector('.qty-value');
+                let cur = parseInt(span.textContent, 10) || 0;
+                const max = parseInt(row.dataset.maxqty, 10) || 0;
+                if (t.classList.contains('qty-up')) {
+                    span.textContent = cur + 1;
+                    // Auto-check when increasing qty
+                    row.querySelector('.item-checkbox').checked = true;
+                }
+                if (t.classList.contains('qty-down') && cur > 0) {
+                    span.textContent = cur - 1;
+                    // Auto-uncheck when qty reaches 0
+                    if (cur - 1 === 0) row.querySelector('.item-checkbox').checked = false;
+                }
+                updateQty(row);
+                updateProgress();
+                updateCatBadges();
+            }
+
+            if (t.classList.contains('btn-max-qty')) {
+                const max = parseInt(row.dataset.maxqty, 10) || 0;
+                row.querySelector('.qty-value').textContent = max;
+                row.querySelector('.item-checkbox').checked = true;
+                updateQty(row);
+                updateProgress();
+                updateCatBadges();
+            }
         });
 
+        // Checkbox change
+        document.querySelectorAll('.item-checkbox').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const row = cb.closest('.item-row');
+                if (cb.checked && parseInt(row.querySelector('.qty-value').textContent, 10) === 0) {
+                    // Auto-set qty to 1 when checking
+                    row.querySelector('.qty-value').textContent = '1';
+                    updateQty(row);
+                }
+                if (!cb.checked) {
+                    row.querySelector('.qty-value').textContent = '0';
+                    updateQty(row);
+                }
+                updateProgress();
+                updateCatBadges();
+            });
+        });
+
+        // Clear all
         document.getElementById('clear-all').onclick = () => {
             document.querySelectorAll('.item-row').forEach(row => {
                 row.querySelector('.item-checkbox').checked = false;
@@ -894,29 +1081,108 @@
                 updateQty(row);
             });
             updateProgress();
+            updateCatBadges();
+            showToast('Checklist limpo');
+        };
+
+        // Search
+        const searchInput = document.getElementById('search-input');
+        const searchClear = document.getElementById('search-clear');
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim().toLowerCase();
+            searchClear.style.display = q ? 'block' : 'none';
+            applyFilters();
+        });
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClear.style.display = 'none';
+            applyFilters();
+        });
+
+        // Filter buttons
+        document.getElementById('filter-all').onclick = () => { currentFilter = 'all'; updateFilterButtons(); applyFilters(); };
+        document.getElementById('filter-filled').onclick = () => { currentFilter = 'filled'; updateFilterButtons(); applyFilters(); };
+        document.getElementById('btn-expand-all').onclick = () => {
+            document.querySelectorAll('.cat-header').forEach(h => h.classList.add('open'));
+            document.querySelectorAll('.cat-items-wrap').forEach(w => w.classList.add('open'));
+        };
+        document.getElementById('btn-collapse-all').onclick = () => {
+            document.querySelectorAll('.cat-header').forEach(h => h.classList.remove('open'));
+            document.querySelectorAll('.cat-items-wrap').forEach(w => w.classList.remove('open'));
         };
 
         document.getElementById('generate-pdf').onclick = generatePDF;
         updateProgress();
+        updateCatBadges();
+    }
 
-        function updateProgress() {
-            const checked = document.querySelectorAll('.item-checkbox:checked').length;
-            const pct = total > 0 ? (checked / total * 100) : 0;
-            document.getElementById('progress-fill').style.width = pct + '%';
-            document.getElementById('progress-label').textContent = `${checked} de ${total} itens selecionados`;
-        }
+    function updateFilterButtons() {
+        document.getElementById('filter-all').classList.toggle('active', currentFilter === 'all');
+        document.getElementById('filter-filled').classList.toggle('active', currentFilter === 'filled');
+    }
+
+    function applyFilters() {
+        const q = document.getElementById('search-input').value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        document.querySelectorAll('.item-row').forEach(row => {
+            const name = row.dataset.name;
+            const matchSearch = !q || name.includes(q);
+            const matchFilter = currentFilter === 'all' || row.querySelector('.item-checkbox').checked;
+            const visible = matchSearch && matchFilter;
+            row.classList.toggle('hidden', !visible);
+            if (visible) visibleCount++;
+        });
+
+        // Show/hide categories with no visible items
+        document.querySelectorAll('.cat-header').forEach(header => {
+            const catId = header.dataset.cat;
+            const wrap = document.getElementById('wrap-' + catId);
+            const hasVisible = wrap.querySelector('.item-row:not(.hidden)');
+            header.style.display = hasVisible ? '' : 'none';
+            wrap.style.display = hasVisible ? '' : 'none';
+
+            // Auto-expand when searching
+            if (q && hasVisible) {
+                header.classList.add('open');
+                wrap.classList.add('open');
+            }
+        });
+
+        document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
     }
 
     function updateQty(row) {
-        const max = parseInt(row.dataset.maxqty, 10) || 0;
         const cur = parseInt(row.querySelector('.qty-value').textContent, 10) || 0;
         row.querySelector('.qty-down').disabled = cur <= 0;
-        row.querySelector('.qty-up').disabled = false;
     }
 
-    // ─────────────────────────────────────────────
-    // GERAÇÃO DO PDF NAVAL
-    // ─────────────────────────────────────────────
+    function updateProgress() {
+        const total = document.querySelectorAll('.item-row').length;
+        const checked = document.querySelectorAll('.item-checkbox:checked').length;
+        const pct = total > 0 ? (checked / total * 100) : 0;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('progress-label').textContent = `${checked} de ${total} itens selecionados`;
+    }
+
+    function updateCatBadges() {
+        const catMap = new Map();
+        document.querySelectorAll('.item-row').forEach(row => {
+            const cat = row.dataset.category.replace(/\W/g, '_');
+            if (!catMap.has(cat)) catMap.set(cat, { total: 0, filled: 0 });
+            catMap.get(cat).total++;
+            if (row.querySelector('.item-checkbox').checked) catMap.get(cat).filled++;
+        });
+        catMap.forEach((v, catId) => {
+            const badge = document.getElementById('fill-' + catId);
+            if (badge) {
+                badge.textContent = `${v.filled} de ${v.total}`;
+                badge.classList.toggle('has-items', v.filled > 0);
+            }
+        });
+    }
+
+    // ── PDF GENERATION ──
     function generatePDF() {
         const { jsPDF } = window.jspdf;
 
@@ -932,13 +1198,14 @@
             const unit = row.querySelector('.unit-badge').textContent;
             const noteEl = row.querySelector('.item-note');
             const note = noteEl ? noteEl.textContent.replace('⚠ ','').trim() : '';
+
             if (!selectedByCat.has(cat)) selectedByCat.set(cat, []);
             selectedByCat.get(cat).push({ name, qty, unit, note });
             totalItems++;
         });
 
         if (selectedByCat.size === 0) {
-            alert('Nenhum item selecionado para gerar o PDF.');
+            showToast('Nenhum item selecionado!');
             return;
         }
 
@@ -949,28 +1216,18 @@
         const dateStr = now.toLocaleDateString('pt-BR');
         const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-        // ── FUNÇÃO CABEÇALHO DE PÁGINA ──
         function drawPageHeader(pageNum, totalPages) {
-            // Fundo topo navy
             doc.setFillColor(10, 37, 64);
             doc.rect(0, 0, W, 42, 'F');
-
-            // Faixa dourada decorativa
             doc.setFillColor(244, 168, 35);
             doc.rect(0, 42, W, 3, 'F');
-
-            // Título principal
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(18);
             doc.setTextColor(255, 255, 255);
             doc.text('CHECKLIST DE RANCHO', margin, 16);
-
-            // Subtítulo embarcação
             doc.setFontSize(11);
             doc.setTextColor(244, 168, 35);
             doc.text(selectedVessel.name, margin, 24);
-
-            // Info direita
             doc.setFontSize(7.5);
             doc.setTextColor(180, 200, 220);
             doc.setFont('helvetica', 'normal');
@@ -978,14 +1235,11 @@
             doc.text(`ID: ${checklistId}`, W - margin, 20, { align: 'right' });
             doc.text(`Casco: ${selectedVessel.casco}`, W - margin, 26, { align: 'right' });
             doc.text(`Pág. ${pageNum} / ${totalPages}`, W - margin, 32, { align: 'right' });
-
-            // Linha de status
             doc.setFontSize(7.5);
             doc.setTextColor(140, 170, 200);
             doc.text(`${totalItems} produto(s) selecionado(s)  ·  ${selectedByCat.size} categoria(s)`, margin, 35);
         }
 
-        // ── RODAPÉ ──
         function drawPageFooter() {
             doc.setFillColor(10, 37, 64);
             doc.rect(0, H - 14, W, 14, 'F');
@@ -995,45 +1249,29 @@
             doc.text('DOCUMENTO INTERNO · CONTROLE DE SUPRIMENTOS NAVAIS', W / 2, H - 6, { align: 'center' });
         }
 
-        // ── PRÉ-CALCULAR PÁGINAS ESTIMADAS ──
-        // Vamos usar 1 passagem real e depois atualizar
-        let currentY = 52;
-        let pageCount = 1;
-
-        // Simular para contar páginas (rápido)
-        let simY = 52;
-        let simPages = 1;
+        let simY = 52, simPages = 1;
         selectedByCat.forEach((items) => {
-            simY += 10; // cat header
-            const rowH = items.length * 7 + 14; // approx autoTable height
+            simY += 10;
+            const rowH = items.length * 7 + 14;
             if (simY + rowH > H - 22) { simPages++; simY = 52; }
             simY += rowH + 6;
         });
         const totalPages = simPages;
 
-        // ── RENDERIZAR ──
         drawPageHeader(1, totalPages);
         drawPageFooter();
-        currentY = 52;
+        let currentY = 52;
         let currentPage = 1;
 
-        // Cor por categoria
         const catColors = {
-            'CARNES':              [120, 30, 30],
-            'PADARIA':             [120, 80, 20],
-            'ALIMENTOS':           [20, 80, 120],
-            'DESCARTÁVEIS':        [60, 60, 110],
-            'PRODUTOS DE LIMPEZA': [20, 100, 70],
-            'HIGIENE PESSOAL':     [100, 40, 100],
-            'HORTI-FRUTI':         [40, 110, 40],
-            'FRIOS':               [20, 100, 130],
-            'TEMPEROS':            [100, 70, 10],
+            'CARNES': [120, 30, 30], 'PADARIA': [120, 80, 20],
+            'ALIMENTOS': [20, 80, 120], 'DESCARTÁVEIS': [60, 60, 110],
+            'PRODUTOS DE LIMPEZA': [20, 100, 70], 'HIGIENE PESSOAL': [100, 40, 100],
+            'HORTI-FRUTI': [40, 110, 40], 'FRIOS': [20, 100, 130], 'TEMPEROS': [100, 70, 10],
         };
 
         selectedByCat.forEach((items, cat) => {
             const catColor = catColors[cat] || [40, 60, 90];
-
-            // Verificar se precisa nova página para cabeçalho da categoria + pelo menos 1 linha
             if (currentY + 30 > H - 22) {
                 currentPage++;
                 doc.addPage();
@@ -1041,8 +1279,6 @@
                 drawPageFooter();
                 currentY = 52;
             }
-
-            // Cabeçalho da categoria (pill colorido)
             doc.setFillColor(...catColor);
             doc.roundedRect(margin, currentY, W - margin * 2, 9, 2, 2, 'F');
             doc.setFont('helvetica', 'bold');
@@ -1053,15 +1289,11 @@
             doc.text(`${items.length} item(ns)`, W - margin - 4, currentY + 6.2, { align: 'right' });
             currentY += 11;
 
-            // Tabela de itens
-            const body = items.map((item, i) => {
-                const rowBg = i % 2 === 0 ? [248, 250, 253] : [255, 255, 255];
-                return [
-                    { content: item.name + (item.note ? `\n⚠ ${item.note}` : ''), styles: { fontStyle: item.note ? 'italic' : 'normal' } },
-                    { content: item.qty, styles: { halign: 'center', fontStyle: 'bold' } },
-                    { content: item.unit, styles: { halign: 'center' } },
-                ];
-            });
+            const body = items.map((item) => [
+                { content: item.name + (item.note ? `\n⚠ ${item.note}` : ''), styles: { fontStyle: item.note ? 'italic' : 'normal' } },
+                { content: item.qty, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: item.unit, styles: { halign: 'center' } },
+            ]);
 
             doc.autoTable({
                 startY: currentY,
@@ -1070,7 +1302,7 @@
                     { content: 'QTD', styles: { halign: 'center' } },
                     { content: 'UNIDADE', styles: { halign: 'center' } },
                 ]],
-                body: body,
+                body,
                 theme: 'grid',
                 margin: { left: margin, right: margin },
                 columnStyles: {
@@ -1079,24 +1311,16 @@
                     2: { cellWidth: 22, fontSize: 8.5, halign: 'center' },
                 },
                 headStyles: {
-                    fillColor: catColor,
-                    textColor: [255, 255, 255],
-                    fontSize: 7.5,
-                    fontStyle: 'bold',
+                    fillColor: catColor, textColor: [255, 255, 255],
+                    fontSize: 7.5, fontStyle: 'bold',
                     cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
                 },
                 bodyStyles: {
-                    fontSize: 8.5,
-                    cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 },
-                    textColor: [22, 41, 61],
-                    lineColor: [210, 220, 232],
-                    lineWidth: 0.3,
+                    fontSize: 8.5, cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 },
+                    textColor: [22, 41, 61], lineColor: [210, 220, 232], lineWidth: 0.3,
                 },
-                alternateRowStyles: {
-                    fillColor: [245, 249, 253],
-                },
+                alternateRowStyles: { fillColor: [245, 249, 253] },
                 didDrawPage: (data) => {
-                    // Redraw header/footer on new pages created by autoTable
                     if (data.pageNumber > currentPage) {
                         currentPage = data.pageNumber;
                         drawPageHeader(currentPage, totalPages);
@@ -1105,11 +1329,9 @@
                 },
                 showHead: 'firstPage',
             });
-
             currentY = doc.lastAutoTable.finalY + 5;
         });
 
-        // ── SUMÁRIO FINAL ──
         if (currentY + 30 > H - 22) {
             currentPage++;
             doc.addPage();
@@ -1118,7 +1340,6 @@
             currentY = 52;
         }
 
-        // Caixa de resumo
         doc.setFillColor(10, 37, 64);
         doc.roundedRect(margin, currentY, W - margin * 2, 22, 3, 3, 'F');
         doc.setFillColor(244, 168, 35);
@@ -1132,7 +1353,6 @@
         doc.setTextColor(180, 210, 230);
         doc.text(`Embarcação: ${selectedVessel.name}   ·   Casco: ${selectedVessel.casco}   ·   Total: ${totalItems} produto(s)   ·   ID: ${checklistId}`, margin + 5, currentY + 14);
 
-        // Assinatura
         currentY += 32;
         doc.setDrawColor(180, 200, 215);
         doc.setLineWidth(0.5);
@@ -1148,6 +1368,7 @@
         doc.text('Assinatura e Data', W - margin - 70, currentY + 10);
 
         doc.save(`rancho_${selectedVessel.name.replace(/\s+/g,'_')}_${checklistId}.pdf`);
+        showToast(`PDF gerado com ${totalItems} produto(s)!`);
     }
 
 })();
