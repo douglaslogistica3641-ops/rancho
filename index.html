@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -193,7 +195,7 @@
         <div class="vessel-banner"><div><div class="vessel-banner-name" id="ord-banner">—</div><div class="vessel-banner-id" id="ord-banner-id">—</div></div><button class="btn-secondary" onclick="goScreen('inventory')">← Inventário</button></div>
         <div class="screen-body">
             <p class="screen-title">Pedido de Rancho</p>
-            <p class="screen-sub">Selecione os itens desejados. Quantidade incrementa de 2 em 2.</p>
+            <p class="screen-sub">Os itens do inventário já foram carregados. Ajuste as quantidades desejadas.</p>
             <div class="summary-card" id="order-summary"></div>
             <div class="progress-label" id="ord-prog-label">0 itens selecionados</div>
             <div class="progress-bar-wrap"><div class="progress-bar-fill" id="ord-prog-fill"></div></div>
@@ -210,7 +212,7 @@
                 <button class="btn-action btn-clear" id="ord-clear">🗑 Limpar</button>
                 <button class="btn-action btn-pdf" id="ord-pdf">📄 Gerar PDF</button>
             </div>
-            <div class="footer-note">Marque os itens e ajuste as quantidades (incremento de 2 em 2).</div>
+            <div class="footer-note">Marque os itens e ajuste as quantidades desejadas para o pedido.</div>
         </div>
     </div>
 </div>
@@ -376,7 +378,22 @@ document.getElementById('btn-inv-next').onclick=()=>{
         <div class="summary-row"><span class="label">Função</span><span class="value">${crewInfo.role}</span></div>
         <div class="summary-row"><span class="label">Tripulação</span><span class="value">${crewInfo.crew} pessoa(s)</span></div>
         <div class="summary-row"><span class="label">Cliente</span><span class="value">${crewInfo.client}</span></div>`;
-    buildSection('ord');goScreen('order');
+    buildSection('ord');
+    // Pre-fill order with inventory quantities
+    document.querySelectorAll('#ord-container .item-row').forEach(r=>{
+        const cat=r.dataset.category;
+        const name=r.querySelector('.item-name').textContent.trim();
+        if(inventoryData[cat]){
+            const inv=inventoryData[cat].find(x=>x.name===name);
+            if(inv&&parseInt(inv.qty)>0){
+                r.querySelector('.qty-value').textContent=inv.qty;
+                r.querySelector('.item-checkbox').checked=true;
+                r.querySelector('.qty-down').disabled=false;
+            }
+        }
+    });
+    updateOrd();
+    goScreen('order');
 };
 
 // ── ORDER CONTROLS ──
@@ -386,8 +403,8 @@ function initOrdControls(){
         const t=e.target,row=t.closest('.item-row');if(!row)return;
         if(t.classList.contains('qty-up')||t.classList.contains('qty-down')){
             const span=row.querySelector('.qty-value');let cur=parseInt(span.textContent)||0;
-            if(t.classList.contains('qty-up')){span.textContent=cur+2;row.querySelector('.item-checkbox').checked=true}
-            if(t.classList.contains('qty-down')&&cur>0){const nv=Math.max(0,cur-2);span.textContent=nv;if(nv===0)row.querySelector('.item-checkbox').checked=false}
+            if(t.classList.contains('qty-up')){span.textContent=cur+1;row.querySelector('.item-checkbox').checked=true}
+            if(t.classList.contains('qty-down')&&cur>0){span.textContent=cur-1;if(cur-1===0)row.querySelector('.item-checkbox').checked=false}
             row.querySelector('.qty-down').disabled=(parseInt(span.textContent)||0)<=0;
             updateOrd();
         }
@@ -398,7 +415,7 @@ function initOrdControls(){
     });
     c.querySelectorAll('.item-checkbox').forEach(cb=>cb.addEventListener('change',()=>{
         const row=cb.closest('.item-row');
-        if(cb.checked&&parseInt(row.querySelector('.qty-value').textContent)===0){row.querySelector('.qty-value').textContent='2';row.querySelector('.qty-down').disabled=false}
+        if(cb.checked&&parseInt(row.querySelector('.qty-value').textContent)===0){row.querySelector('.qty-value').textContent='1';row.querySelector('.qty-down').disabled=false}
         if(!cb.checked){row.querySelector('.qty-value').textContent='0';row.querySelector('.qty-down').disabled=true}
         updateOrd();
     }));
