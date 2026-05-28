@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1089,8 +1091,8 @@ body{
         </div>
         <div class="header-meta">
             <span><strong>FORM 109</strong></span>
-            <span>Rev. 03</span>
-            <span>14/04/2026</span>
+            <span id="hdr-rev"></span>
+            <span id="hdr-date"></span>
         </div>
     </header>
 
@@ -1348,8 +1350,10 @@ body{
 (function(){
 'use strict';
 
-const FORM_REV='FORM 109 – Lista do Rancho · Revisão 03 · 14/04/2026';
-const UNITS_LIST=['UN','KG','L','CX','PCT','FARDO','PAR','BISNAGA','FR','DZ'];
+const REV_NUM='04';
+const REV_DATE='28/05/2026';
+const FORM_REV='FORM 109 – Lista do Rancho · Revisão '+REV_NUM+' · '+REV_DATE;
+const UNITS_LIST=['UN','KG','L','CX','CART','PCT','FARDO','PAR','BISNAGA','FR','DZ'];
 const STORAGE_KEY='rancho_naval_state_v1';
 
 /* ============================================================
@@ -1531,13 +1535,14 @@ const itemsData=[
 {cat:"PRODUTOS DE LIMPEZA",name:"VEJA PERFUMADO 2L",maxQty:6,unit:"UN"},
 {cat:"PRODUTOS DE LIMPEZA",name:"SBP INSETOS",maxQty:4,unit:"UN"},
 {cat:"PRODUTOS DE LIMPEZA",name:"BLOCO P/ CAIXA ACOPLADA",maxQty:6,unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"LUSTRA-MÓVEIS",maxQty:4,unit:"UN"},
 /* HIGIENE PESSOAL */
 {cat:"HIGIENE PESSOAL",name:"CREME DENTAL COLGATE",maxQty:10,unit:"UN",note:"SOMENTE EQUIPE RS"},
 {cat:"HIGIENE PESSOAL",name:"SABONETE PROTEX",maxQty:16,unit:"UN",note:"SOMENTE EQUIPE RS"},
 /* HORTI-FRUTI (CHUCHU duplicado removido) */
 {cat:"HORTI-FRUTI",name:"COUVE-FLOR",maxQty:10,unit:"UN"},
 {cat:"HORTI-FRUTI",name:"PEPINO",maxQty:5,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"ALHO",maxQty:1,unit:"CX"},
+{cat:"HORTI-FRUTI",name:"ALHO",maxQty:1,unit:"KG"},
 {cat:"HORTI-FRUTI",name:"BATATA-INGLESA",maxQty:20,unit:"KG"},
 {cat:"HORTI-FRUTI",name:"BATATA-DOCE",maxQty:6,unit:"KG"},
 {cat:"HORTI-FRUTI",name:"BETERRABA",maxQty:3,unit:"KG"},
@@ -1567,7 +1572,7 @@ const itemsData=[
 {cat:"HORTI-FRUTI",name:"CEBOLINHA",maxQty:5,unit:"UN"},
 {cat:"HORTI-FRUTI",name:"COENTRO",maxQty:8,unit:"UN"},
 {cat:"HORTI-FRUTI",name:"SALSA",maxQty:10,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"OVOS BRANCOS GRANDES CARTELA C/30",maxQty:2,unit:"UN"},
+{cat:"HORTI-FRUTI",name:"OVOS BRANCOS GRANDES",maxQty:2,unit:"CART",note:"Cartela c/ 30 un"},
 {cat:"HORTI-FRUTI",name:"MARACUJÁ",maxQty:5,unit:"KG"},
 {cat:"HORTI-FRUTI",name:"MELÃO",maxQty:8,unit:"UN"},
 {cat:"HORTI-FRUTI",name:"UVA ITÁLIA / VITÓRIA",maxQty:4,unit:"UN"},
@@ -1613,18 +1618,7 @@ const catIcons={
     'FRIOS':'i-cat-frios',
     'TEMPEROS':'i-cat-temperos'
 };
-/* Cores de categoria para o PDF (tons navy sóbrios) */
-const catColors={
-    'CARNES':[120,50,50],
-    'PADARIA':[130,95,35],
-    'ALIMENTOS':[30,70,110],
-    'DESCARTÁVEIS':[75,75,110],
-    'PRODUTOS DE LIMPEZA':[30,95,80],
-    'HIGIENE PESSOAL':[95,55,95],
-    'HORTI-FRUTI':[50,100,55],
-    'FRIOS':[35,100,130],
-    'TEMPEROS':[110,75,25]
-};
+/* (catColors removido: o PDF agora usa paleta única e sóbria) */
 
 /* ============================================================
    ESTADO DA APLICAÇÃO
@@ -1702,6 +1696,10 @@ function getCats(){
     for(const i of itemsData){
         if(!map.has(i.cat)){map.set(i.cat,[]);cats.push(i.cat)}
         map.get(i.cat).push(i);
+    }
+    /* Ordena alfabeticamente os itens dentro de cada categoria (acentos pt-BR) */
+    for(const arr of map.values()){
+        arr.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
     }
     return{cats,map};
 }
@@ -2201,36 +2199,117 @@ document.getElementById('extra-pdf').onclick=generateExtraPDF;
 /* ============================================================
    PDF - HELPERS
    ============================================================ */
+/* Paleta única e sóbria do PDF (navy + dourado discreto + tons de cinza) */
+const PDF_C={
+    navy:[10,37,64], gold:[168,122,19], goldLt:[206,167,82],
+    ink:[28,44,62], grey:[103,118,135], greyLt:[150,165,182],
+    line:[208,217,226], zebra:[246,248,251], panel:[248,250,252],
+    catBand:[237,240,244], white:[255,255,255]
+};
+const PDF_TOP=37; /* y inicial do conteúdo em cada página (abaixo do cabeçalho) */
+function _f(doc,c){doc.setFillColor(c[0],c[1],c[2]);}
+function _t(doc,c){doc.setTextColor(c[0],c[1],c[2]);}
+function _d(doc,c){doc.setDrawColor(c[0],c[1],c[2]);}
+function _clip(doc,s,maxw){s=String(s==null?'—':s);while(s.length>3&&doc.getTextWidth(s)>maxw)s=s.slice(0,-2);return s;}
+
+/* Cabeçalho corrido (repetido em todas as páginas) */
 function pdfDrawH(doc,pg,W,margin,pdfTitle,dateStr,timeStr){
-    doc.setFillColor(10,37,64);doc.rect(0,0,W,42,'F');
-    doc.setFillColor(200,148,28);doc.rect(0,42,W,2.5,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(255,255,255);
-    doc.text(pdfTitle,margin,16);
-    doc.setFontSize(7.5);doc.setTextColor(255,255,255);doc.setFont('helvetica','normal');
-    doc.text(FORM_REV,margin,22);
-    doc.setFontSize(10.5);doc.setTextColor(200,148,28);doc.setFont('helvetica','bold');
-    doc.text(state.selectedVessel.name,margin,28.5);
-    doc.setFontSize(7);doc.setTextColor(180,200,220);doc.setFont('helvetica','normal');
-    doc.text('Data: '+dateStr+'  '+timeStr,W-margin,14,{align:'right'});
-    doc.text('ID: '+state.checklistId,W-margin,19,{align:'right'});
-    doc.text('Casco: '+state.selectedVessel.casco,W-margin,24,{align:'right'});
-    doc.text('Pág. '+pg,W-margin,29,{align:'right'});
-    doc.setTextColor(140,170,200);
-    doc.text(state.crewInfo.name+' · '+state.crewInfo.role+' · Trip.: '+state.crewInfo.crew+' · Cliente: '+state.crewInfo.client,margin,35);
+    _f(doc,PDF_C.navy);doc.rect(0,0,W,29,'F');
+    _f(doc,PDF_C.gold);doc.rect(0,29,W,1.2,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(15);_t(doc,PDF_C.white);
+    doc.text('FORM 109',margin,12.5);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);_t(doc,PDF_C.goldLt);
+    doc.text(pdfTitle,margin,18);
+    doc.setFontSize(6.8);_t(doc,[182,199,216]);
+    doc.text('Sistema de Controle de Suprimentos Navais',margin,22.5);
+    doc.setFont('helvetica','bold');doc.setFontSize(9);_t(doc,PDF_C.white);
+    doc.text(_clip(doc,state.selectedVessel.name,118),margin,27);
+    doc.setFont('helvetica','normal');doc.setFontSize(6.8);_t(doc,[178,196,214]);
+    doc.text('Emissão  '+dateStr+'  '+timeStr,W-margin,11,{align:'right'});
+    doc.text('ID  '+state.checklistId,W-margin,15.3,{align:'right'});
+    doc.text('Casco  '+state.selectedVessel.casco,W-margin,19.6,{align:'right'});
+    doc.setFont('helvetica','bold');_t(doc,PDF_C.goldLt);
+    doc.text('Pág. '+pg,W-margin,24.5,{align:'right'});
 }
+/* Rodapé discreto: filete + textos pequenos */
 function pdfDrawF(doc,W,H){
-    doc.setFillColor(10,37,64);doc.rect(0,H-12,W,12,'F');
-    doc.setFontSize(6.5);doc.setTextColor(140,165,195);doc.setFont('helvetica','normal');
-    doc.text('DOCUMENTO INTERNO · CONTROLE DE SUPRIMENTOS NAVAIS',W/2,H-5,{align:'center'});
+    _d(doc,PDF_C.line);doc.setLineWidth(0.3);doc.line(14,H-9.5,W-14,H-9.5);
+    doc.setFont('helvetica','normal');doc.setFontSize(6.3);_t(doc,PDF_C.greyLt);
+    doc.text('Documento interno · Controle de Suprimentos Navais',14,H-5.5);
+    doc.text(FORM_REV,W-14,H-5.5,{align:'right'});
 }
+/* Painel de informações (somente página 1) */
+function pdfInfoPanel(doc,margin,W,y){
+    const h=20;
+    _f(doc,PDF_C.panel);doc.rect(margin,y,W-margin*2,h,'F');
+    _d(doc,PDF_C.line);doc.setLineWidth(0.3);doc.rect(margin,y,W-margin*2,h,'S');
+    _f(doc,PDF_C.gold);doc.rect(margin,y,1.6,h,'F');
+    const c1=margin+7,c2=W/2+5,maxw=W/2-margin-12;
+    function field(x,vy,label,val){
+        doc.setFont('helvetica','bold');doc.setFontSize(6.3);_t(doc,PDF_C.grey);
+        doc.text(label.toUpperCase(),x,vy-3.4);
+        doc.setFont('helvetica','normal');doc.setFontSize(9);_t(doc,PDF_C.ink);
+        doc.text(_clip(doc,val,maxw),x,vy);
+    }
+    field(c1,y+8,'Responsável',state.crewInfo.name);
+    field(c2,y+8,'Cliente',state.crewInfo.client);
+    field(c1,y+15.5,'Função',state.crewInfo.role);
+    field(c2,y+15.5,'Tripulação a bordo',state.crewInfo.crew+' pessoa(s)');
+    return h;
+}
+/* Título de seção (barra navy com filete dourado) */
+function pdfSectionTitle(doc,margin,W,y,txt){
+    const h=9;
+    _f(doc,PDF_C.navy);doc.rect(margin,y,W-margin*2,h,'F');
+    _f(doc,PDF_C.gold);doc.rect(margin,y,2,h,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(9.5);_t(doc,PDF_C.white);
+    doc.text(txt,margin+6,y+6);
+    return h;
+}
+/* Faixa de categoria (cinza claro uniforme + acento navy) */
+function pdfCatBand(doc,margin,W,y,cat,count){
+    const h=8;
+    _f(doc,PDF_C.catBand);doc.rect(margin,y,W-margin*2,h,'F');
+    _f(doc,PDF_C.navy);doc.rect(margin,y,1.4,h,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);_t(doc,PDF_C.navy);
+    doc.text(cat,margin+5,y+5.4);
+    doc.setFont('helvetica','normal');doc.setFontSize(7.5);_t(doc,PDF_C.grey);
+    doc.text(count+' item(ns)',W-margin-4,y+5.4,{align:'right'});
+    return h;
+}
+/* Resumo: cabeçalho navy + painel claro com pares rótulo/valor */
+function pdfSummary(doc,margin,W,y,lines){
+    const headH=8;
+    _f(doc,PDF_C.navy);doc.rect(margin,y,W-margin*2,headH,'F');
+    _f(doc,PDF_C.gold);doc.rect(margin,y,2,headH,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);_t(doc,PDF_C.white);
+    doc.text('RESUMO DA SOLICITAÇÃO',margin+6,y+5.4);
+    const boxY=y+headH,boxH=6+lines.length*5.4;
+    _f(doc,PDF_C.panel);doc.rect(margin,boxY,W-margin*2,boxH,'F');
+    _d(doc,PDF_C.line);doc.setLineWidth(0.3);doc.rect(margin,boxY,W-margin*2,boxH,'S');
+    let ly=boxY+6.6;
+    lines.forEach(ln=>{
+        doc.setFont('helvetica','bold');doc.setFontSize(6.8);_t(doc,PDF_C.grey);
+        doc.text(ln[0].toUpperCase(),margin+6,ly);
+        doc.setFont('helvetica','normal');doc.setFontSize(8.5);_t(doc,PDF_C.ink);
+        doc.text(_clip(doc,ln[1],W-margin*2-58),margin+52,ly);
+        ly+=5.4;
+    });
+    return headH+boxH;
+}
+/* Assinaturas */
 function pdfSignatures(doc,margin,W,cy){
-    doc.setDrawColor(180,200,215);doc.setLineWidth(0.4);
-    doc.line(margin,cy,margin+75,cy);doc.line(W-margin-75,cy,W-margin,cy);
-    doc.setFontSize(8);doc.setTextColor(22,41,61);doc.setFont('helvetica','bold');
-    doc.text('Edson Feitoza',margin,cy+5);doc.text(state.crewInfo.name,W-margin-75,cy+5);
-    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(120,145,175);
-    doc.text('Fiel de Rancho',margin,cy+9);doc.text(state.crewInfo.role,W-margin-75,cy+9);
-    doc.setFontSize(6.5);doc.text('Assinatura e Data',margin,cy+14);doc.text('Assinatura e Data',W-margin-75,cy+14);
+    const colW=72,x2=W-margin-colW;
+    _d(doc,PDF_C.line);doc.setLineWidth(0.4);
+    doc.line(margin,cy,margin+colW,cy);doc.line(x2,cy,x2+colW,cy);
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);_t(doc,PDF_C.ink);
+    doc.text('Edson Feitoza',margin,cy+5);
+    doc.text(_clip(doc,state.crewInfo.name,colW),x2,cy+5);
+    doc.setFont('helvetica','normal');doc.setFontSize(7);_t(doc,PDF_C.grey);
+    doc.text('Fiel de Rancho',margin,cy+9.5);
+    doc.text(_clip(doc,state.crewInfo.role,colW),x2,cy+9.5);
+    doc.setFontSize(6.5);_t(doc,PDF_C.greyLt);
+    doc.text('Assinatura e data',margin,cy+14);doc.text('Assinatura e data',x2,cy+14);
 }
 
 function setPdfLoading(btnId,loading){
@@ -2281,102 +2360,88 @@ function _generatePDF(){
     const now=new Date();
     const dateStr=now.toLocaleDateString('pt-BR');
     const timeStr=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    let currentY=52,currentPage=1;
+    let currentY=PDF_TOP,currentPage=1;
     const pdfTitle=modeLabel();
 
     function drawH(pg){pdfDrawH(doc,pg,W,margin,pdfTitle,dateStr,timeStr)}
     function drawF(){pdfDrawF(doc,W,H)}
-    function ensureSpace(n){if(currentY+n>H-20){currentPage++;doc.addPage();drawH(currentPage);drawF();currentY=52}}
+    function ensureSpace(n){if(currentY+n>H-16){currentPage++;doc.addPage();drawH(currentPage);drawF();currentY=PDF_TOP}}
 
-    function renderTable(items,cat,color){
-        ensureSpace(30);
-        doc.setFillColor.apply(doc,color);
-        doc.rect(margin,currentY,W-margin*2,9,'F');
-        doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
-        doc.text(cat,margin+4,currentY+6.2);
-        doc.setFontSize(7.5);doc.text(items.length+' item(ns)',W-margin-4,currentY+6.2,{align:'right'});
-        currentY+=11;
-        const body=items.map(it=>[
-            {content:it.name+(it.note?'\n[!] '+it.note:''),styles:{fontStyle:it.note?'italic':'normal'}},
-            {content:it.qty,styles:{halign:'center',fontStyle:'bold'}},
-            {content:it.unit,styles:{halign:'center'}}
-        ]);
-        doc.autoTable({
-            startY:currentY,
-            head:[[{content:'PRODUTO',styles:{halign:'left'}},{content:'QTD',styles:{halign:'center'}},{content:'UNIDADE',styles:{halign:'center'}}]],
-            body,theme:'grid',
-            margin:{left:margin,right:margin},
-            columnStyles:{0:{cellWidth:'auto',fontSize:8.5},1:{cellWidth:20,fontSize:9,halign:'center'},2:{cellWidth:22,fontSize:8.5,halign:'center'}},
-            headStyles:{fillColor:color,textColor:[255,255,255],fontSize:7.5,fontStyle:'bold',cellPadding:{top:3,bottom:3,left:4,right:4}},
-            bodyStyles:{fontSize:8.5,cellPadding:{top:3.5,bottom:3.5,left:4,right:4},textColor:[22,41,61],lineColor:[210,220,232],lineWidth:0.3},
-            alternateRowStyles:{fillColor:[245,248,252]},
-            didDrawPage:data=>{if(data.pageNumber>currentPage){currentPage=data.pageNumber;drawH(currentPage);drawF()}},
-            showHead:'firstPage'
-        });
-        currentY=doc.lastAutoTable.finalY+5;
+    function tableOpts(extra){
+        return Object.assign({
+            theme:'striped',
+            margin:{top:PDF_TOP,left:margin,right:margin},
+            styles:{font:'helvetica',fontSize:8.5,cellPadding:{top:2.7,bottom:2.7,left:5,right:5},textColor:PDF_C.ink,lineWidth:0,overflow:'linebreak'},
+            headStyles:{fillColor:PDF_C.navy,textColor:PDF_C.white,fontStyle:'bold',fontSize:7.5,cellPadding:{top:2.9,bottom:2.9,left:5,right:5}},
+            alternateRowStyles:{fillColor:PDF_C.zebra},
+            didDrawPage:data=>{if(data.pageNumber>currentPage){currentPage=data.pageNumber;drawH(currentPage);drawF()}}
+        },extra);
     }
-    function renderOrderTable(items,cat,color){
-        ensureSpace(30);
-        doc.setFillColor.apply(doc,color);
-        doc.rect(margin,currentY,W-margin*2,9,'F');
-        doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
-        doc.text(cat,margin+4,currentY+6.2);
-        doc.setFontSize(7.5);doc.text(items.length+' item(ns)',W-margin-4,currentY+6.2,{align:'right'});
-        currentY+=11;
+
+    function renderTable(items,cat){
+        ensureSpace(24);
+        currentY+=pdfCatBand(doc,margin,W,currentY,cat,items.length)+2;
         const body=items.map(it=>[
-            {content:it.name+(it.note?'\n[!] '+it.note:''),styles:{fontStyle:it.note?'italic':'normal'}},
-            {content:it.invQty,styles:{halign:'center',textColor:[100,130,160]}},
+            it.name+(it.note?'  ('+it.note+')':''),
             {content:it.qty,styles:{halign:'center',fontStyle:'bold'}},
             {content:it.unit,styles:{halign:'center'}}
         ]);
-        doc.autoTable({
+        doc.autoTable(tableOpts({
             startY:currentY,
-            head:[[{content:'PRODUTO',styles:{halign:'left'}},{content:'BORDO',styles:{halign:'center'}},{content:'PEDIR',styles:{halign:'center'}},{content:'UNID.',styles:{halign:'center'}}]],
-            body,theme:'grid',
-            margin:{left:margin,right:margin},
-            columnStyles:{0:{cellWidth:'auto',fontSize:8.5},1:{cellWidth:20,fontSize:8.5,halign:'center'},2:{cellWidth:20,fontSize:9,halign:'center'},3:{cellWidth:20,fontSize:8.5,halign:'center'}},
-            headStyles:{fillColor:color,textColor:[255,255,255],fontSize:7.5,fontStyle:'bold',cellPadding:{top:3,bottom:3,left:4,right:4}},
-            bodyStyles:{fontSize:8.5,cellPadding:{top:3.5,bottom:3.5,left:4,right:4},textColor:[22,41,61],lineColor:[210,220,232],lineWidth:0.3},
-            alternateRowStyles:{fillColor:[245,248,252]},
-            didDrawPage:data=>{if(data.pageNumber>currentPage){currentPage=data.pageNumber;drawH(currentPage);drawF()}},
-            showHead:'firstPage'
-        });
-        currentY=doc.lastAutoTable.finalY+5;
+            head:[['PRODUTO','QTD','UNID.']],
+            body,
+            columnStyles:{0:{cellWidth:'auto'},1:{cellWidth:22,halign:'center'},2:{cellWidth:24,halign:'center'}}
+        }));
+        currentY=doc.lastAutoTable.finalY+6;
+    }
+    function renderOrderTable(items,cat){
+        ensureSpace(24);
+        currentY+=pdfCatBand(doc,margin,W,currentY,cat,items.length)+2;
+        const body=items.map(it=>[
+            it.name+(it.note?'  ('+it.note+')':''),
+            {content:it.invQty,styles:{halign:'center',textColor:PDF_C.grey}},
+            {content:it.qty,styles:{halign:'center',fontStyle:'bold',textColor:PDF_C.navy}},
+            {content:it.unit,styles:{halign:'center'}}
+        ]);
+        doc.autoTable(tableOpts({
+            startY:currentY,
+            head:[['PRODUTO','BORDO','PEDIR','UNID.']],
+            body,
+            columnStyles:{0:{cellWidth:'auto'},1:{cellWidth:22,halign:'center'},2:{cellWidth:22,halign:'center'},3:{cellWidth:22,halign:'center'}}
+        }));
+        currentY=doc.lastAutoTable.finalY+6;
     }
 
     drawH(1);drawF();
+    currentY+=pdfInfoPanel(doc,margin,W,currentY)+6;
 
     if(state.currentMode==='rancho'){
-        doc.setFillColor(10,37,64);doc.rect(margin,currentY,W-margin*2,10,'F');
-        doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(200,148,28);
-        doc.text('INVENTÁRIO DE BORDO',margin+4,currentY+6.8);
-        currentY+=14;
+        ensureSpace(18);
+        currentY+=pdfSectionTitle(doc,margin,W,currentY,'INVENTÁRIO DE BORDO')+3;
         for(const cat in state.inventoryData){
-            renderTable(state.inventoryData[cat],cat,catColors[cat]||[40,60,90]);
+            renderTable(state.inventoryData[cat],cat);
         }
+        currentY+=2;
     }
 
-    ensureSpace(20);
-    doc.setFillColor(10,37,64);doc.rect(margin,currentY,W-margin*2,10,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(200,148,28);
+    ensureSpace(18);
     const orderSectionTitle=state.currentMode==='rancho'?'PEDIDO DE RANCHO':'COMPLEMENTO DE RANCHO';
-    doc.text(orderSectionTitle,margin+4,currentY+6.8);
-    currentY+=14;
+    currentY+=pdfSectionTitle(doc,margin,W,currentY,orderSectionTitle)+3;
     if(state.currentMode==='rancho'){
-        orderByCat.forEach((items,cat)=>renderOrderTable(items,cat,catColors[cat]||[40,60,90]));
+        orderByCat.forEach((items,cat)=>renderOrderTable(items,cat));
     }else{
-        orderByCat.forEach((items,cat)=>renderTable(items,cat,catColors[cat]||[40,60,90]));
+        orderByCat.forEach((items,cat)=>renderTable(items,cat));
     }
 
-    ensureSpace(30);
-    doc.setFillColor(10,37,64);doc.rect(margin,currentY,W-margin*2,22,'F');
-    doc.setFillColor(200,148,28);doc.rect(margin,currentY+19.5,W-margin*2,2.5,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(255,255,255);
-    doc.text('RESUMO DA SOLICITAÇÃO',margin+5,currentY+7);
-    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(180,210,230);
-    doc.text('Tipo: '+pdfTitle+'  ·  Embarcação: '+state.selectedVessel.name+'  ·  Casco: '+state.selectedVessel.casco+'  ·  Pedido: '+orderTotal+' produto(s)  ·  Trip.: '+state.crewInfo.crew+'  ·  Cliente: '+state.crewInfo.client,margin+5,currentY+13.5);
-    currentY+=32;
-    ensureSpace(25);
+    ensureSpace(70);
+    currentY+=pdfSummary(doc,margin,W,currentY,[
+        ['Tipo',pdfTitle],
+        ['Embarcação',state.selectedVessel.name+' · '+state.selectedVessel.casco],
+        ['Produtos no pedido',orderTotal+' item(ns)'],
+        ['Tripulação a bordo',state.crewInfo.crew+' pessoa(s)'],
+        ['Cliente',state.crewInfo.client]
+    ])+13;
+    ensureSpace(22);
     pdfSignatures(doc,margin,W,currentY);
 
     const slug=state.currentMode==='rancho'?'rancho':'complemento';
@@ -2412,47 +2477,44 @@ function _generateExtraPDF(){
     const now=new Date();
     const dateStr=now.toLocaleDateString('pt-BR');
     const timeStr=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    let currentY=52,currentPage=1;
+    let currentY=PDF_TOP,currentPage=1;
 
     function drawH(pg){pdfDrawH(doc,pg,W,margin,'PEDIDO EXTRA',dateStr,timeStr)}
     function drawF(){pdfDrawF(doc,W,H)}
-    function ensureSpace(n){if(currentY+n>H-20){currentPage++;doc.addPage();drawH(currentPage);drawF();currentY=52}}
+    function ensureSpace(n){if(currentY+n>H-16){currentPage++;doc.addPage();drawH(currentPage);drawF();currentY=PDF_TOP}}
 
     drawH(1);drawF();
-
-    doc.setFillColor(176,80,42);doc.rect(margin,currentY,W-margin*2,10,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(255,255,255);
-    doc.text('ITENS DO PEDIDO EXTRA',margin+4,currentY+6.8);
-    currentY+=14;
+    currentY+=pdfInfoPanel(doc,margin,W,currentY)+6;
+    currentY+=pdfSectionTitle(doc,margin,W,currentY,'ITENS DO PEDIDO EXTRA')+3;
 
     const body=items.map(it=>[
-        {content:it.name},
-        {content:it.qty,styles:{halign:'center',fontStyle:'bold'}},
+        it.name,
+        {content:it.qty,styles:{halign:'center',fontStyle:'bold',textColor:PDF_C.navy}},
         {content:it.unit,styles:{halign:'center'}}
     ]);
     doc.autoTable({
+        theme:'striped',
         startY:currentY,
-        head:[[{content:'PRODUTO',styles:{halign:'left'}},{content:'QTD',styles:{halign:'center'}},{content:'UNIDADE',styles:{halign:'center'}}]],
-        body,theme:'grid',
-        margin:{left:margin,right:margin},
-        columnStyles:{0:{cellWidth:'auto',fontSize:8.5},1:{cellWidth:20,fontSize:9,halign:'center'},2:{cellWidth:22,fontSize:8.5,halign:'center'}},
-        headStyles:{fillColor:[176,80,42],textColor:[255,255,255],fontSize:7.5,fontStyle:'bold',cellPadding:{top:3,bottom:3,left:4,right:4}},
-        bodyStyles:{fontSize:8.5,cellPadding:{top:3.5,bottom:3.5,left:4,right:4},textColor:[22,41,61],lineColor:[210,220,232],lineWidth:0.3},
-        alternateRowStyles:{fillColor:[252,244,238]},
-        didDrawPage:data=>{if(data.pageNumber>currentPage){currentPage=data.pageNumber;drawH(currentPage);drawF()}},
-        showHead:'firstPage'
+        margin:{top:PDF_TOP,left:margin,right:margin},
+        head:[['PRODUTO','QTD','UNID.']],
+        body,
+        styles:{font:'helvetica',fontSize:8.5,cellPadding:{top:2.7,bottom:2.7,left:5,right:5},textColor:PDF_C.ink,lineWidth:0,overflow:'linebreak'},
+        headStyles:{fillColor:PDF_C.navy,textColor:PDF_C.white,fontStyle:'bold',fontSize:7.5,cellPadding:{top:2.9,bottom:2.9,left:5,right:5}},
+        alternateRowStyles:{fillColor:PDF_C.zebra},
+        columnStyles:{0:{cellWidth:'auto'},1:{cellWidth:22,halign:'center'},2:{cellWidth:24,halign:'center'}},
+        didDrawPage:data=>{if(data.pageNumber>currentPage){currentPage=data.pageNumber;drawH(currentPage);drawF()}}
     });
-    currentY=doc.lastAutoTable.finalY+10;
+    currentY=doc.lastAutoTable.finalY+8;
 
-    ensureSpace(30);
-    doc.setFillColor(10,37,64);doc.rect(margin,currentY,W-margin*2,22,'F');
-    doc.setFillColor(200,148,28);doc.rect(margin,currentY+19.5,W-margin*2,2.5,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(255,255,255);
-    doc.text('RESUMO DA SOLICITAÇÃO',margin+5,currentY+7);
-    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(180,210,230);
-    doc.text('Tipo: PEDIDO EXTRA  ·  Embarcação: '+state.selectedVessel.name+'  ·  Casco: '+state.selectedVessel.casco+'  ·  Itens: '+items.length+' produto(s)  ·  Trip.: '+state.crewInfo.crew+'  ·  Cliente: '+state.crewInfo.client,margin+5,currentY+13.5);
-    currentY+=32;
-    ensureSpace(25);
+    ensureSpace(70);
+    currentY+=pdfSummary(doc,margin,W,currentY,[
+        ['Tipo','PEDIDO EXTRA'],
+        ['Embarcação',state.selectedVessel.name+' · '+state.selectedVessel.casco],
+        ['Itens',items.length+' produto(s)'],
+        ['Tripulação a bordo',state.crewInfo.crew+' pessoa(s)'],
+        ['Cliente',state.crewInfo.client]
+    ])+13;
+    ensureSpace(22);
     pdfSignatures(doc,margin,W,currentY);
 
     doc.save('extra_'+state.selectedVessel.name.replace(/\s+/g,'_')+'_'+state.checklistId+'.pdf');
@@ -2465,6 +2527,10 @@ function _generateExtraPDF(){
 initHome();
 initVessels();
 initCrew();
+
+/* Revisão do formulário a partir de fonte única (evita divergência) */
+document.getElementById('hdr-rev').textContent='Rev. '+REV_NUM;
+document.getElementById('hdr-date').textContent=REV_DATE;
 
 /* ============================================================
    PWA - REGISTRO DO SERVICE WORKER + UPDATE + INSTALL
