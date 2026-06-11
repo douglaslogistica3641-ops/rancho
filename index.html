@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -575,14 +574,13 @@ body{
     display:flex;flex-wrap:wrap;align-items:center;
     gap:5px 8px;
 }
-.max-qty-badge,.unit-badge,.inv-qty-badge,.item-note{
+.unit-badge,.inv-qty-badge,.item-note{
     font-family:'IBM Plex Mono',monospace;
     font-size:.68rem;font-weight:600;
     padding:2px 7px;
     letter-spacing:.3px;
     border:1px solid;
 }
-.max-qty-badge{background:#e6edf5;color:var(--navy-700);border-color:#c7d3df}
 .unit-badge{background:var(--bg);color:var(--muted);border-color:var(--line);font-weight:500}
 .inv-qty-badge{background:#e3eef7;color:var(--navy-600);border-color:#c0d2e2;white-space:nowrap}
 .inv-qty-badge.zero{background:var(--bg);color:var(--muted-2);border-color:var(--line)}
@@ -607,13 +605,21 @@ body{
 }
 .qty-control button:hover:not(:disabled){background:var(--line-soft)}
 .qty-control button:disabled{opacity:.3;cursor:not-allowed}
-.qty-control span{
-    min-width:32px;text-align:center;
+.qty-control input.qty-value{
+    width:48px;height:28px;
+    border:none;
+    text-align:center;
     font-weight:600;font-size:.85rem;
     color:var(--text);background:var(--white);
     font-family:'IBM Plex Mono',monospace;
-    padding:0 4px;
+    outline:none;
+    padding:0 2px;
+    -moz-appearance:textfield;
+    appearance:textfield;
 }
+.qty-control input.qty-value::-webkit-inner-spin-button,
+.qty-control input.qty-value::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.qty-control input.qty-value:focus{background:var(--bg-2);box-shadow:inset 0 0 0 1px var(--navy-600)}
 
 .ord-label{
     font-family:'IBM Plex Mono',monospace;
@@ -621,19 +627,6 @@ body{
     color:var(--muted);
     text-transform:uppercase;letter-spacing:.5px;
 }
-
-.btn-max-qty{
-    background:transparent;
-    border:1px dashed var(--line);
-    padding:2px 7px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:.62rem;font-weight:600;
-    color:var(--muted);
-    cursor:pointer;
-    transition:all .12s;
-    letter-spacing:.3px;
-}
-.btn-max-qty:hover{border-color:var(--navy-600);color:var(--navy-800);border-style:solid}
 
 /* ============================================================
    ALERTAS E MENSAGENS
@@ -1350,8 +1343,8 @@ body{
 (function(){
 'use strict';
 
-const REV_NUM='06';
-const REV_DATE='28/05/2026';
+const REV_NUM='07';
+const REV_DATE='11/06/2026';
 const FORM_REV='FORM 109 – Lista do Rancho · Revisão '+REV_NUM+' · '+REV_DATE;
 const UNITS_LIST=['UN','KG','L','CX','CART','PCT','FARDO','PAR','BISNAGA','FR','DZ'];
 const STORAGE_KEY='rancho_naval_state_v1';
@@ -1374,236 +1367,236 @@ const vessels=[
 ];
 
 /* ============================================================
-   DADOS - ITENS (limpeza: CHUCHU duplicado removido, FD→PCT,
-   maxQty como número, português padronizado)
+   DADOS - ITENS
+   (Rev. 07: campo maxQty removido — quantidade livre)
    ============================================================ */
 const itemsData=[
 /* CARNES */
-{cat:"CARNES",name:"LAGARTO BOVINO",maxQty:5,unit:"KG"},
-{cat:"CARNES",name:"PATINHO BOVINO (PICADINHO)",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"ALCATRA BOVINA",maxQty:25,unit:"KG"},
-{cat:"CARNES",name:"CONTRAFILÉ BOVINO",maxQty:20,unit:"KG"},
-{cat:"CARNES",name:"COSTELA BOVINA",maxQty:15,unit:"KG"},
-{cat:"CARNES",name:"PEITO BOVINO",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"ACÉM BOVINO (MOÍDO)",maxQty:12,unit:"KG"},
-{cat:"CARNES",name:"CUPIM BOVINO",maxQty:8,unit:"KG"},
-{cat:"CARNES",name:"RABADA BOVINA CORTADA",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"MOCOTÓ BOVINO",maxQty:5,unit:"KG"},
-{cat:"CARNES",name:"BUCHO BOVINO",maxQty:8,unit:"KG"},
-{cat:"CARNES",name:"PEITO DE FRANGO",maxQty:15,unit:"KG"},
-{cat:"CARNES",name:"SOBRECOXA DE FRANGO",maxQty:20,unit:"KG"},
-{cat:"CARNES",name:"ASA DE FRANGO",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"COXINHA DA ASA DE FRANGO",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"CORAÇÃO DE FRANGO",maxQty:4,unit:"KG"},
-{cat:"CARNES",name:"CARRÉ SUÍNO",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"COSTELA SUÍNA",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"LOMBO SUÍNO",maxQty:7,unit:"KG"},
-{cat:"CARNES",name:"FILÉ DE PESCADA BRANCA / TILÁPIA",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"PERNIL SUÍNO",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"BACON FATIADO",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"CARNE-SECA DIANTEIRA",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"HAMBÚRGUER BOVINO",maxQty:2,unit:"CX"},
-{cat:"CARNES",name:"SALSICHA",maxQty:5,unit:"KG"},
-{cat:"CARNES",name:"PÉ SUÍNO SALGADO",maxQty:2,unit:"KG"},
-{cat:"CARNES",name:"RABO SUÍNO SALGADO",maxQty:2,unit:"KG"},
-{cat:"CARNES",name:"LINGUIÇA CALABRESA",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"LINGUIÇA DE FRANGO",maxQty:3,unit:"KG"},
-{cat:"CARNES",name:"LINGUIÇA TOSCANA",maxQty:8,unit:"KG"},
-{cat:"CARNES",name:"PÃO DE ALHO",maxQty:5,unit:"UN"},
-{cat:"CARNES",name:"BARRIGA SUÍNA",maxQty:10,unit:"KG"},
-{cat:"CARNES",name:"CHULETA BOVINA",maxQty:8,unit:"KG"},
-{cat:"CARNES",name:"BATATA PRÉ-FRITA CONGELADA 2KG",maxQty:5,unit:"PCT"},
+{cat:"CARNES",name:"LAGARTO BOVINO",unit:"KG"},
+{cat:"CARNES",name:"PATINHO BOVINO (PICADINHO)",unit:"KG"},
+{cat:"CARNES",name:"ALCATRA BOVINA",unit:"KG"},
+{cat:"CARNES",name:"CONTRAFILÉ BOVINO",unit:"KG"},
+{cat:"CARNES",name:"COSTELA BOVINA",unit:"KG"},
+{cat:"CARNES",name:"PEITO BOVINO",unit:"KG"},
+{cat:"CARNES",name:"ACÉM BOVINO (MOÍDO)",unit:"KG"},
+{cat:"CARNES",name:"CUPIM BOVINO",unit:"KG"},
+{cat:"CARNES",name:"RABADA BOVINA CORTADA",unit:"KG"},
+{cat:"CARNES",name:"MOCOTÓ BOVINO",unit:"KG"},
+{cat:"CARNES",name:"BUCHO BOVINO",unit:"KG"},
+{cat:"CARNES",name:"PEITO DE FRANGO",unit:"KG"},
+{cat:"CARNES",name:"SOBRECOXA DE FRANGO",unit:"KG"},
+{cat:"CARNES",name:"ASA DE FRANGO",unit:"KG"},
+{cat:"CARNES",name:"COXINHA DA ASA DE FRANGO",unit:"KG"},
+{cat:"CARNES",name:"CORAÇÃO DE FRANGO",unit:"KG"},
+{cat:"CARNES",name:"CARRÉ SUÍNO",unit:"KG"},
+{cat:"CARNES",name:"COSTELA SUÍNA",unit:"KG"},
+{cat:"CARNES",name:"LOMBO SUÍNO",unit:"KG"},
+{cat:"CARNES",name:"FILÉ DE PESCADA BRANCA / TILÁPIA",unit:"KG"},
+{cat:"CARNES",name:"PERNIL SUÍNO",unit:"KG"},
+{cat:"CARNES",name:"BACON FATIADO",unit:"KG"},
+{cat:"CARNES",name:"CARNE-SECA DIANTEIRA",unit:"KG"},
+{cat:"CARNES",name:"HAMBÚRGUER BOVINO",unit:"CX"},
+{cat:"CARNES",name:"SALSICHA",unit:"KG"},
+{cat:"CARNES",name:"PÉ SUÍNO SALGADO",unit:"KG"},
+{cat:"CARNES",name:"RABO SUÍNO SALGADO",unit:"KG"},
+{cat:"CARNES",name:"LINGUIÇA CALABRESA",unit:"KG"},
+{cat:"CARNES",name:"LINGUIÇA DE FRANGO",unit:"KG"},
+{cat:"CARNES",name:"LINGUIÇA TOSCANA",unit:"KG"},
+{cat:"CARNES",name:"PÃO DE ALHO",unit:"UN"},
+{cat:"CARNES",name:"BARRIGA SUÍNA",unit:"KG"},
+{cat:"CARNES",name:"CHULETA BOVINA",unit:"KG"},
+{cat:"CARNES",name:"BATATA PRÉ-FRITA CONGELADA 2KG",unit:"PCT"},
 /* PADARIA */
-{cat:"PADARIA",name:"MORTADELA FATIADA",maxQty:2,unit:"KG"},
-{cat:"PADARIA",name:"PRESUNTO COZIDO FATIADO",maxQty:7,unit:"KG"},
-{cat:"PADARIA",name:"QUEIJO MUSSARELA FATIADO",maxQty:10,unit:"KG"},
-{cat:"PADARIA",name:"QUEIJO MINAS FRESCAL",maxQty:10,unit:"UN"},
-{cat:"PADARIA",name:"MANTEIGA COM SAL 500G",maxQty:5,unit:"UN"},
-{cat:"PADARIA",name:"MARGARINA QUALY 500G",maxQty:8,unit:"UN"},
-{cat:"PADARIA",name:"PIZZA PRÉ-PRONTA",maxQty:20,unit:"UN"},
-{cat:"PADARIA",name:"REQUEIJÃO ELEGÊ",maxQty:12,unit:"UN"},
-{cat:"PADARIA",name:"LEITE INTEGRAL 1L",maxQty:24,unit:"L"},
-{cat:"PADARIA",name:"LEITE EM PÓ 500G",maxQty:5,unit:"UN"},
-{cat:"PADARIA",name:"PÃO PLUS VITA",maxQty:15,unit:"PCT"},
-{cat:"PADARIA",name:"BISNAGUINHA DE PÃO 220G",maxQty:10,unit:"PCT"},
-{cat:"PADARIA",name:"PÃO DE HOT DOG",maxQty:36,unit:"UN"},
-{cat:"PADARIA",name:"PÃO DE HAMBÚRGUER BRIOCHE",maxQty:40,unit:"UN"},
-{cat:"PADARIA",name:"BOLOS PANCO / PLUSVITA",maxQty:10,unit:"PCT"},
-{cat:"PADARIA",name:"BISCOITO CREAM CRACKER 200G",maxQty:7,unit:"PCT"},
-{cat:"PADARIA",name:"BISCOITO MAISENA 200G",maxQty:8,unit:"PCT"},
-{cat:"PADARIA",name:"BISCOITO RECHEADO 140G (VARIADOS)",maxQty:40,unit:"PCT"},
-{cat:"PADARIA",name:"QUEIJO RALADO 100G",maxQty:15,unit:"UN"},
-{cat:"PADARIA",name:"IOGURTE NESTLÉ / DANONE / ITAMBÉ",maxQty:10,unit:"UN"},
-{cat:"PADARIA",name:"LEITE FERMENTADO 1L",maxQty:5,unit:"UN"},
-{cat:"PADARIA",name:"MASSA DE BOLO (VARIADOS)",maxQty:10,unit:"KG"},
-{cat:"PADARIA",name:"CATUPIRY (MARCA CATUPIRY)",maxQty:2,unit:"BISNAGA"},
-{cat:"PADARIA",name:"CREAM CHEESE",maxQty:2,unit:"BISNAGA"},
-{cat:"PADARIA",name:"QUEIJO COALHO",maxQty:5,unit:"PCT"},
-{cat:"PADARIA",name:"PÃO CONGELADO",maxQty:10,unit:"KG"},
+{cat:"PADARIA",name:"MORTADELA FATIADA",unit:"KG"},
+{cat:"PADARIA",name:"PRESUNTO COZIDO FATIADO",unit:"KG"},
+{cat:"PADARIA",name:"QUEIJO MUSSARELA FATIADO",unit:"KG"},
+{cat:"PADARIA",name:"QUEIJO MINAS FRESCAL",unit:"UN"},
+{cat:"PADARIA",name:"MANTEIGA COM SAL 500G",unit:"UN"},
+{cat:"PADARIA",name:"MARGARINA QUALY 500G",unit:"UN"},
+{cat:"PADARIA",name:"PIZZA PRÉ-PRONTA",unit:"UN"},
+{cat:"PADARIA",name:"REQUEIJÃO ELEGÊ",unit:"UN"},
+{cat:"PADARIA",name:"LEITE INTEGRAL 1L",unit:"L"},
+{cat:"PADARIA",name:"LEITE EM PÓ 500G",unit:"UN"},
+{cat:"PADARIA",name:"PÃO PLUS VITA",unit:"PCT"},
+{cat:"PADARIA",name:"BISNAGUINHA DE PÃO 220G",unit:"PCT"},
+{cat:"PADARIA",name:"PÃO DE HOT DOG",unit:"UN"},
+{cat:"PADARIA",name:"PÃO DE HAMBÚRGUER BRIOCHE",unit:"UN"},
+{cat:"PADARIA",name:"BOLOS PANCO / PLUSVITA",unit:"PCT"},
+{cat:"PADARIA",name:"BISCOITO CREAM CRACKER 200G",unit:"PCT"},
+{cat:"PADARIA",name:"BISCOITO MAISENA 200G",unit:"PCT"},
+{cat:"PADARIA",name:"BISCOITO RECHEADO 140G (VARIADOS)",unit:"PCT"},
+{cat:"PADARIA",name:"QUEIJO RALADO 100G",unit:"UN"},
+{cat:"PADARIA",name:"IOGURTE NESTLÉ / DANONE / ITAMBÉ",unit:"UN"},
+{cat:"PADARIA",name:"LEITE FERMENTADO 1L",unit:"UN"},
+{cat:"PADARIA",name:"MASSA DE BOLO (VARIADOS)",unit:"KG"},
+{cat:"PADARIA",name:"CATUPIRY (MARCA CATUPIRY)",unit:"BISNAGA"},
+{cat:"PADARIA",name:"CREAM CHEESE",unit:"BISNAGA"},
+{cat:"PADARIA",name:"QUEIJO COALHO",unit:"PCT"},
+{cat:"PADARIA",name:"PÃO CONGELADO",unit:"KG"},
 /* ALIMENTOS */
-{cat:"ALIMENTOS",name:"TAPIOCA 500G",maxQty:6,unit:"UN"},
-{cat:"ALIMENTOS",name:"EXTRATO DE TOMATE 300G",maxQty:14,unit:"UN"},
-{cat:"ALIMENTOS",name:"MACARRÃO ESPAGUETE 500G",maxQty:10,unit:"UN"},
-{cat:"ALIMENTOS",name:"MACARRÃO PARAFUSO 500G",maxQty:10,unit:"UN"},
-{cat:"ALIMENTOS",name:"MACARRÃO TALHARIM 500G",maxQty:6,unit:"UN"},
-{cat:"ALIMENTOS",name:"MACARRÃO DE LASANHA",maxQty:5,unit:"PCT"},
-{cat:"ALIMENTOS",name:"AÇÚCAR REFINADO",maxQty:10,unit:"KG"},
-{cat:"ALIMENTOS",name:"AÇÚCAR CRISTAL",maxQty:10,unit:"KG"},
-{cat:"ALIMENTOS",name:"AÇÚCAR MASCAVO",maxQty:3,unit:"UN"},
-{cat:"ALIMENTOS",name:"ARROZ BRANCO TIPO 1",maxQty:30,unit:"KG"},
-{cat:"ALIMENTOS",name:"PÓ DE CAFÉ",maxQty:12,unit:"KG"},
-{cat:"ALIMENTOS",name:"FARINHA DE TRIGO 1KG",maxQty:3,unit:"UN"},
-{cat:"ALIMENTOS",name:"FARINHA DE MANDIOCA 1KG",maxQty:4,unit:"UN"},
-{cat:"ALIMENTOS",name:"FUBÁ MIMOSO 1KG",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"FERMENTO BIOLÓGICO",maxQty:4,unit:"UN"},
-{cat:"ALIMENTOS",name:"LEITE DE COCO 500G",maxQty:6,unit:"UN"},
-{cat:"ALIMENTOS",name:"FEIJÃO PRETO",maxQty:20,unit:"KG"},
-{cat:"ALIMENTOS",name:"FEIJÃO BRANCO",maxQty:3,unit:"KG"},
-{cat:"ALIMENTOS",name:"ACHOCOLATADO LATA 400G",maxQty:3,unit:"UN"},
-{cat:"ALIMENTOS",name:"ÓLEO DE SOJA 900ML",maxQty:24,unit:"UN"},
-{cat:"ALIMENTOS",name:"GELATINA ABACAXI / MORANGO / LIMÃO",maxQty:12,unit:"UN"},
-{cat:"ALIMENTOS",name:"AVEIA NATURAL 1KG",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"GOIABADA 600G",maxQty:3,unit:"UN"},
-{cat:"ALIMENTOS",name:"LEITE CONDENSADO 395G",maxQty:25,unit:"UN"},
-{cat:"ALIMENTOS",name:"FLOCÃO 500G",maxQty:10,unit:"UN"},
-{cat:"ALIMENTOS",name:"GRANOLA 500G",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"CREME DE LEITE TP 200G",maxQty:30,unit:"UN"},
-{cat:"ALIMENTOS",name:"AZEITE DE OLIVA EXTRAVIRGEM",maxQty:4,unit:"UN"},
-{cat:"ALIMENTOS",name:"MOLHO SHOYU 1L",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"MOLHO DE PIMENTA",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"MOSTARDA",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"PALMITO 300G",maxQty:8,unit:"UN"},
-{cat:"ALIMENTOS",name:"KETCHUP 1L",maxQty:6,unit:"UN"},
-{cat:"ALIMENTOS",name:"BARBECUE 400G",maxQty:3,unit:"UN"},
-{cat:"ALIMENTOS",name:"ERVILHA EM LATA 200G",maxQty:10,unit:"UN"},
-{cat:"ALIMENTOS",name:"MAIONESE HELLMANN'S 500G",maxQty:8,unit:"UN"},
-{cat:"ALIMENTOS",name:"MILHO EM LATA 200G",maxQty:15,unit:"UN"},
-{cat:"ALIMENTOS",name:"AZEITONA VERDE SEM CAROÇO 500G",maxQty:3,unit:"PCT"},
-{cat:"ALIMENTOS",name:"BATATA PALHA 400G",maxQty:10,unit:"PCT"},
-{cat:"ALIMENTOS",name:"ORÉGANO",maxQty:3,unit:"UN"},
-{cat:"ALIMENTOS",name:"SARDINHA EM LATA ÓLEO 125G",maxQty:8,unit:"UN"},
-{cat:"ALIMENTOS",name:"VINAGRE TINTO 750ML",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"FANTA 2L",maxQty:10,unit:"UN"},
-{cat:"ALIMENTOS",name:"COCA-COLA ZERO 2L",maxQty:12,unit:"UN"},
-{cat:"ALIMENTOS",name:"COCA-COLA 2L",maxQty:12,unit:"UN"},
-{cat:"ALIMENTOS",name:"GUARANÁ KUAT / ANTÁRTICA 2L",maxQty:10,unit:"UN"},
-{cat:"ALIMENTOS",name:"SUCO DE FRUTAS",maxQty:10,unit:"UN"},
-{cat:"ALIMENTOS",name:"CHÁ MATE 1,5L",maxQty:4,unit:"UN"},
-{cat:"ALIMENTOS",name:"ÁGUA MINERAL SEM GÁS 500ML",maxQty:25,unit:"FARDO"},
-{cat:"ALIMENTOS",name:"ÁGUA COM GÁS 500ML",maxQty:5,unit:"FARDO"},
-{cat:"ALIMENTOS",name:"CHOCOLATE GRANULADO",maxQty:1,unit:"PCT"},
-{cat:"ALIMENTOS",name:"MEL DE ABELHA",maxQty:2,unit:"UN"},
-{cat:"ALIMENTOS",name:"CREME DE CEBOLA",maxQty:1,unit:"PCT"},
-{cat:"ALIMENTOS",name:"CANJICA",maxQty:4,unit:"UN"},
-{cat:"ALIMENTOS",name:"ADOÇANTE",maxQty:5,unit:"FR"},
-{cat:"ALIMENTOS",name:"CAIXA DE BOMBONS",maxQty:5,unit:"CX"},
-{cat:"ALIMENTOS",name:"DOCE DE LEITE",maxQty:3,unit:"UN"},
-{cat:"ALIMENTOS",name:"COCO RALADO",maxQty:3,unit:"UN"},
+{cat:"ALIMENTOS",name:"TAPIOCA 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"EXTRATO DE TOMATE 300G",unit:"UN"},
+{cat:"ALIMENTOS",name:"MACARRÃO ESPAGUETE 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"MACARRÃO PARAFUSO 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"MACARRÃO TALHARIM 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"MACARRÃO DE LASANHA",unit:"PCT"},
+{cat:"ALIMENTOS",name:"AÇÚCAR REFINADO",unit:"KG"},
+{cat:"ALIMENTOS",name:"AÇÚCAR CRISTAL",unit:"KG"},
+{cat:"ALIMENTOS",name:"AÇÚCAR MASCAVO",unit:"UN"},
+{cat:"ALIMENTOS",name:"ARROZ BRANCO TIPO 1",unit:"KG"},
+{cat:"ALIMENTOS",name:"PÓ DE CAFÉ",unit:"KG"},
+{cat:"ALIMENTOS",name:"FARINHA DE TRIGO 1KG",unit:"UN"},
+{cat:"ALIMENTOS",name:"FARINHA DE MANDIOCA 1KG",unit:"UN"},
+{cat:"ALIMENTOS",name:"FUBÁ MIMOSO 1KG",unit:"UN"},
+{cat:"ALIMENTOS",name:"FERMENTO BIOLÓGICO",unit:"UN"},
+{cat:"ALIMENTOS",name:"LEITE DE COCO 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"FEIJÃO PRETO",unit:"KG"},
+{cat:"ALIMENTOS",name:"FEIJÃO BRANCO",unit:"KG"},
+{cat:"ALIMENTOS",name:"ACHOCOLATADO LATA 400G",unit:"UN"},
+{cat:"ALIMENTOS",name:"ÓLEO DE SOJA 900ML",unit:"UN"},
+{cat:"ALIMENTOS",name:"GELATINA ABACAXI / MORANGO / LIMÃO",unit:"UN"},
+{cat:"ALIMENTOS",name:"AVEIA NATURAL 1KG",unit:"UN"},
+{cat:"ALIMENTOS",name:"GOIABADA 600G",unit:"UN"},
+{cat:"ALIMENTOS",name:"LEITE CONDENSADO 395G",unit:"UN"},
+{cat:"ALIMENTOS",name:"FLOCÃO 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"GRANOLA 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"CREME DE LEITE TP 200G",unit:"UN"},
+{cat:"ALIMENTOS",name:"AZEITE DE OLIVA EXTRAVIRGEM",unit:"UN"},
+{cat:"ALIMENTOS",name:"MOLHO SHOYU 1L",unit:"UN"},
+{cat:"ALIMENTOS",name:"MOLHO DE PIMENTA",unit:"UN"},
+{cat:"ALIMENTOS",name:"MOSTARDA",unit:"UN"},
+{cat:"ALIMENTOS",name:"PALMITO 300G",unit:"UN"},
+{cat:"ALIMENTOS",name:"KETCHUP 1L",unit:"UN"},
+{cat:"ALIMENTOS",name:"BARBECUE 400G",unit:"UN"},
+{cat:"ALIMENTOS",name:"ERVILHA EM LATA 200G",unit:"UN"},
+{cat:"ALIMENTOS",name:"MAIONESE HELLMANN'S 500G",unit:"UN"},
+{cat:"ALIMENTOS",name:"MILHO EM LATA 200G",unit:"UN"},
+{cat:"ALIMENTOS",name:"AZEITONA VERDE SEM CAROÇO 500G",unit:"PCT"},
+{cat:"ALIMENTOS",name:"BATATA PALHA 400G",unit:"PCT"},
+{cat:"ALIMENTOS",name:"ORÉGANO",unit:"UN"},
+{cat:"ALIMENTOS",name:"SARDINHA EM LATA ÓLEO 125G",unit:"UN"},
+{cat:"ALIMENTOS",name:"VINAGRE TINTO 750ML",unit:"UN"},
+{cat:"ALIMENTOS",name:"FANTA 2L",unit:"UN"},
+{cat:"ALIMENTOS",name:"COCA-COLA ZERO 2L",unit:"UN"},
+{cat:"ALIMENTOS",name:"COCA-COLA 2L",unit:"UN"},
+{cat:"ALIMENTOS",name:"GUARANÁ KUAT / ANTÁRTICA 2L",unit:"UN"},
+{cat:"ALIMENTOS",name:"SUCO DE FRUTAS",unit:"UN"},
+{cat:"ALIMENTOS",name:"CHÁ MATE 1,5L",unit:"UN"},
+{cat:"ALIMENTOS",name:"ÁGUA MINERAL SEM GÁS 500ML",unit:"FARDO"},
+{cat:"ALIMENTOS",name:"ÁGUA COM GÁS 500ML",unit:"FARDO"},
+{cat:"ALIMENTOS",name:"CHOCOLATE GRANULADO",unit:"PCT"},
+{cat:"ALIMENTOS",name:"MEL DE ABELHA",unit:"UN"},
+{cat:"ALIMENTOS",name:"CREME DE CEBOLA",unit:"PCT"},
+{cat:"ALIMENTOS",name:"CANJICA",unit:"UN"},
+{cat:"ALIMENTOS",name:"ADOÇANTE",unit:"FR"},
+{cat:"ALIMENTOS",name:"CAIXA DE BOMBONS",unit:"CX"},
+{cat:"ALIMENTOS",name:"DOCE DE LEITE",unit:"UN"},
+{cat:"ALIMENTOS",name:"COCO RALADO",unit:"UN"},
 /* DESCARTÁVEIS */
-{cat:"DESCARTÁVEIS",name:"COPO DESCARTÁVEL 200ML CX/100",maxQty:2,unit:"CX"},
-{cat:"DESCARTÁVEIS",name:"PAPEL HIGIÊNICO 12UN",maxQty:6,unit:"PCT"},
-{cat:"DESCARTÁVEIS",name:"PAPEL TOALHA P/ FRITURA",maxQty:10,unit:"PCT"},
-{cat:"DESCARTÁVEIS",name:"GUARDANAPO",maxQty:10,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"FOLHA DE ALUMÍNIO GRANDE",maxQty:10,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"PANO PERFEX ROLO",maxQty:1,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"FILME PVC",maxQty:2,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"PALITO DE DENTE GINA",maxQty:6,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"CARVÃO 3KG",maxQty:6,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"PALITO DE ESPETO",maxQty:2,unit:"PCT"},
-{cat:"DESCARTÁVEIS",name:"PANO DE PRATO",maxQty:10,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"PLÁSTICO CELOFANE P/ ASSAR",maxQty:3,unit:"UN"},
-{cat:"DESCARTÁVEIS",name:"SACOS P/ LIXO 110L",maxQty:5,unit:"PCT"},
-{cat:"DESCARTÁVEIS",name:"SACOS P/ LIXO 200L",maxQty:5,unit:"PCT"},
+{cat:"DESCARTÁVEIS",name:"COPO DESCARTÁVEL 200ML CX/100",unit:"CX"},
+{cat:"DESCARTÁVEIS",name:"PAPEL HIGIÊNICO 12UN",unit:"PCT"},
+{cat:"DESCARTÁVEIS",name:"PAPEL TOALHA P/ FRITURA",unit:"PCT"},
+{cat:"DESCARTÁVEIS",name:"GUARDANAPO",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"FOLHA DE ALUMÍNIO GRANDE",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"PANO PERFEX ROLO",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"FILME PVC",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"PALITO DE DENTE GINA",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"CARVÃO 3KG",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"PALITO DE ESPETO",unit:"PCT"},
+{cat:"DESCARTÁVEIS",name:"PANO DE PRATO",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"PLÁSTICO CELOFANE P/ ASSAR",unit:"UN"},
+{cat:"DESCARTÁVEIS",name:"SACOS P/ LIXO 110L",unit:"PCT"},
+{cat:"DESCARTÁVEIS",name:"SACOS P/ LIXO 200L",unit:"PCT"},
 /* PRODUTOS DE LIMPEZA */
-{cat:"PRODUTOS DE LIMPEZA",name:"ÁGUA SANITÁRIA 5L",maxQty:10,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"ÁLCOOL 92° 1L",maxQty:3,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"ÁLCOOL EM GEL 500G",maxQty:5,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"AMACIANTE DE ROUPAS 2L",maxQty:10,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"BOM AR",maxQty:4,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"LIMPA-CASA PERFUMADO 500ML",maxQty:6,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"DESINFETANTE 5L",maxQty:8,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"DETERGENTE 500ML",maxQty:2,unit:"CX"},
-{cat:"PRODUTOS DE LIMPEZA",name:"SABÃO LÍQUIDO ROUPA 5L",maxQty:5,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"SABÃO EM PASTA",maxQty:2,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"SABÃO DE COCO",maxQty:3,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"ESPONJA DUPLA FACE",maxQty:10,unit:"PCT"},
-{cat:"PRODUTOS DE LIMPEZA",name:"VEJA MULTIUSO 500ML",maxQty:10,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"LUVA",maxQty:10,unit:"PAR"},
-{cat:"PRODUTOS DE LIMPEZA",name:"BOMBRIL",maxQty:10,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"VASSOURA PLÁSTICA",maxQty:4,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"LIMPA-VIDRO",maxQty:2,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"VEJA PERFUMADO 2L",maxQty:6,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"SBP INSETOS",maxQty:4,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"BLOCO P/ CAIXA ACOPLADA",maxQty:6,unit:"UN"},
-{cat:"PRODUTOS DE LIMPEZA",name:"LUSTRA-MÓVEIS",maxQty:4,unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"ÁGUA SANITÁRIA 5L",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"ÁLCOOL 92° 1L",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"ÁLCOOL EM GEL 500G",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"AMACIANTE DE ROUPAS 2L",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"BOM AR",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"LIMPA-CASA PERFUMADO 500ML",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"DESINFETANTE 5L",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"DETERGENTE 500ML",unit:"CX"},
+{cat:"PRODUTOS DE LIMPEZA",name:"SABÃO LÍQUIDO ROUPA 5L",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"SABÃO EM PASTA",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"SABÃO DE COCO",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"ESPONJA DUPLA FACE",unit:"PCT"},
+{cat:"PRODUTOS DE LIMPEZA",name:"VEJA MULTIUSO 500ML",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"LUVA",unit:"PAR"},
+{cat:"PRODUTOS DE LIMPEZA",name:"BOMBRIL",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"VASSOURA PLÁSTICA",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"LIMPA-VIDRO",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"VEJA PERFUMADO 2L",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"SBP INSETOS",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"BLOCO P/ CAIXA ACOPLADA",unit:"UN"},
+{cat:"PRODUTOS DE LIMPEZA",name:"LUSTRA-MÓVEIS",unit:"UN"},
 /* HIGIENE PESSOAL */
-{cat:"HIGIENE PESSOAL",name:"CREME DENTAL COLGATE",maxQty:10,unit:"UN",note:"SOMENTE EQUIPE RS"},
-{cat:"HIGIENE PESSOAL",name:"SABONETE PROTEX",maxQty:16,unit:"UN",note:"SOMENTE EQUIPE RS"},
-/* HORTI-FRUTI (CHUCHU duplicado removido) */
-{cat:"HORTI-FRUTI",name:"COUVE-FLOR",maxQty:10,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"PEPINO",maxQty:5,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"ALHO",maxQty:1,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"BATATA-INGLESA",maxQty:20,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"BATATA-DOCE",maxQty:6,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"BETERRABA",maxQty:3,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"CEBOLA",maxQty:10,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"CENOURA",maxQty:10,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"CHUCHU",maxQty:3,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"AIPIM / MANDIOCA",maxQty:10,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"INHAME",maxQty:4,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"PIMENTÃO VERDE",maxQty:6,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"TOMATE",maxQty:15,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"CHEIRO-VERDE",maxQty:20,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"ABACAXI",maxQty:10,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"QUIABO",maxQty:6,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"ABÓBORA MORANGA",maxQty:2,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"ABÓBORA VERDE",maxQty:5,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"BANANA-PRATA",maxQty:10,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"BANANA-DA-TERRA",maxQty:5,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"TANGERINA PONCÃ",maxQty:10,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"LARANJA",maxQty:20,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"MELANCIA",maxQty:4,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"MAÇÃ NACIONAL",maxQty:6,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"MAMÃO",maxQty:3,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"ALFACE LISA",maxQty:10,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"AGRIÃO",maxQty:5,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"COUVE",maxQty:10,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"LIMÃO",maxQty:8,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"CEBOLINHA",maxQty:5,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"COENTRO",maxQty:8,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"SALSA",maxQty:10,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"OVOS BRANCOS GRANDES",maxQty:2,unit:"CART",note:"Cartela c/ 30 un"},
-{cat:"HORTI-FRUTI",name:"MARACUJÁ",maxQty:5,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"MELÃO",maxQty:8,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"UVA ITÁLIA / VITÓRIA",maxQty:4,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"GENGIBRE",maxQty:1,unit:"UN"},
-{cat:"HORTI-FRUTI",name:"PERA",maxQty:7,unit:"KG"},
-{cat:"HORTI-FRUTI",name:"ABACATE",maxQty:3,unit:"KG"},
+{cat:"HIGIENE PESSOAL",name:"CREME DENTAL COLGATE",unit:"UN",note:"SOMENTE EQUIPE RS"},
+{cat:"HIGIENE PESSOAL",name:"SABONETE PROTEX",unit:"UN",note:"SOMENTE EQUIPE RS"},
+/* HORTI-FRUTI */
+{cat:"HORTI-FRUTI",name:"COUVE-FLOR",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"PEPINO",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"ALHO",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"BATATA-INGLESA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"BATATA-DOCE",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"BETERRABA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"CEBOLA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"CENOURA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"CHUCHU",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"AIPIM / MANDIOCA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"INHAME",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"PIMENTÃO VERDE",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"TOMATE",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"CHEIRO-VERDE",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"ABACAXI",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"QUIABO",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"ABÓBORA MORANGA",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"ABÓBORA VERDE",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"BANANA-PRATA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"BANANA-DA-TERRA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"TANGERINA PONCÃ",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"LARANJA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"MELANCIA",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"MAÇÃ NACIONAL",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"MAMÃO",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"ALFACE LISA",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"AGRIÃO",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"COUVE",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"LIMÃO",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"CEBOLINHA",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"COENTRO",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"SALSA",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"OVOS BRANCOS GRANDES",unit:"CART",note:"Cartela c/ 30 un"},
+{cat:"HORTI-FRUTI",name:"MARACUJÁ",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"MELÃO",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"UVA ITÁLIA / VITÓRIA",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"GENGIBRE",unit:"UN"},
+{cat:"HORTI-FRUTI",name:"PERA",unit:"KG"},
+{cat:"HORTI-FRUTI",name:"ABACATE",unit:"KG"},
 /* FRIOS */
-{cat:"FRIOS",name:"SORVETE",maxQty:10,unit:"UN"},
-{cat:"FRIOS",name:"AÇAÍ 1,5L",maxQty:5,unit:"UN"},
-{cat:"FRIOS",name:"POLPA DE FRUTAS",maxQty:20,unit:"UN"},
+{cat:"FRIOS",name:"SORVETE",unit:"UN"},
+{cat:"FRIOS",name:"AÇAÍ 1,5L",unit:"UN"},
+{cat:"FRIOS",name:"POLPA DE FRUTAS",unit:"UN"},
 /* TEMPEROS */
-{cat:"TEMPEROS",name:"SAL REFINADO 1KG",maxQty:5,unit:"KG"},
-{cat:"TEMPEROS",name:"SAL GROSSO 1KG",maxQty:4,unit:"KG"},
-{cat:"TEMPEROS",name:"SAL DE PARRILLA",maxQty:3,unit:"UN"},
-{cat:"TEMPEROS",name:"CHIMICHURRI",maxQty:8,unit:"PCT"},
-{cat:"TEMPEROS",name:"TEMPERO BAIANO",maxQty:8,unit:"UN"},
-{cat:"TEMPEROS",name:"AÇAFRÃO",maxQty:6,unit:"UN"},
-{cat:"TEMPEROS",name:"COLORAU 800G",maxQty:1,unit:"PCT"},
-{cat:"TEMPEROS",name:"CALDO DE CARNE (CX 6UN)",maxQty:5,unit:"CX"},
-{cat:"TEMPEROS",name:"CALDO DE LEGUMES (CX 6UN)",maxQty:5,unit:"CX"},
-{cat:"TEMPEROS",name:"CALDO DE FRANGO (CX 6UN)",maxQty:5,unit:"CX"},
-{cat:"TEMPEROS",name:"SAZON (LIMÃO, NORDESTINO, CARNE)",maxQty:3,unit:"PCT"},
-{cat:"TEMPEROS",name:"LEMON PEPPER 30G/10G",maxQty:5,unit:"PCT"},
-{cat:"TEMPEROS",name:"PÁPRICA DEFUMADA 10G",maxQty:10,unit:"PCT"},
-{cat:"TEMPEROS",name:"PIMENTA-DO-REINO 35G",maxQty:4,unit:"UN"},
-{cat:"TEMPEROS",name:"LOURO EM FOLHA 40G",maxQty:4,unit:"PCT"},
-{cat:"TEMPEROS",name:"CRAVO-DA-ÍNDIA 40G",maxQty:1,unit:"PCT"},
-{cat:"TEMPEROS",name:"NOZ-MOSCADA EM PÓ 8G",maxQty:1,unit:"PCT"},
-{cat:"TEMPEROS",name:"CANELA EM PÓ",maxQty:3,unit:"PCT"},
-{cat:"TEMPEROS",name:"PIMENTA CALABRESA",maxQty:5,unit:"UN"},
-{cat:"TEMPEROS",name:"TEMPERO COMPLETO",maxQty:2,unit:"UN"}
+{cat:"TEMPEROS",name:"SAL REFINADO 1KG",unit:"KG"},
+{cat:"TEMPEROS",name:"SAL GROSSO 1KG",unit:"KG"},
+{cat:"TEMPEROS",name:"SAL DE PARRILLA",unit:"UN"},
+{cat:"TEMPEROS",name:"CHIMICHURRI",unit:"PCT"},
+{cat:"TEMPEROS",name:"TEMPERO BAIANO",unit:"UN"},
+{cat:"TEMPEROS",name:"AÇAFRÃO",unit:"UN"},
+{cat:"TEMPEROS",name:"COLORAU 800G",unit:"PCT"},
+{cat:"TEMPEROS",name:"CALDO DE CARNE (CX 6UN)",unit:"CX"},
+{cat:"TEMPEROS",name:"CALDO DE LEGUMES (CX 6UN)",unit:"CX"},
+{cat:"TEMPEROS",name:"CALDO DE FRANGO (CX 6UN)",unit:"CX"},
+{cat:"TEMPEROS",name:"SAZON (LIMÃO, NORDESTINO, CARNE)",unit:"PCT"},
+{cat:"TEMPEROS",name:"LEMON PEPPER 30G/10G",unit:"PCT"},
+{cat:"TEMPEROS",name:"PÁPRICA DEFUMADA 10G",unit:"PCT"},
+{cat:"TEMPEROS",name:"PIMENTA-DO-REINO 35G",unit:"UN"},
+{cat:"TEMPEROS",name:"LOURO EM FOLHA 40G",unit:"PCT"},
+{cat:"TEMPEROS",name:"CRAVO-DA-ÍNDIA 40G",unit:"PCT"},
+{cat:"TEMPEROS",name:"NOZ-MOSCADA EM PÓ 8G",unit:"PCT"},
+{cat:"TEMPEROS",name:"CANELA EM PÓ",unit:"PCT"},
+{cat:"TEMPEROS",name:"PIMENTA CALABRESA",unit:"UN"},
+{cat:"TEMPEROS",name:"TEMPERO COMPLETO",unit:"UN"}
 ];
 
 /* Mapeamento categoria -> ícone SVG (todos monocromáticos) */
@@ -1618,7 +1611,6 @@ const catIcons={
     'FRIOS':'i-cat-frios',
     'TEMPEROS':'i-cat-temperos'
 };
-/* (catColors removido: o PDF agora usa paleta única e sóbria) */
 
 /* ============================================================
    ESTADO DA APLICAÇÃO
@@ -1679,7 +1671,7 @@ function genId(){
 
 function showToast(msg,type){
     const t=document.getElementById('toast');
-    const iconId=type==='error'?'i-alert':type==='success'?'i-check':'i-check';
+    const iconId=type==='error'?'i-alert':'i-check';
     t.innerHTML='<svg><use href="#'+iconId+'"/></svg><span>'+msg+'</span>';
     t.classList.add('show');
     clearTimeout(t._timer);
@@ -1689,6 +1681,30 @@ function showToast(msg,type){
 function escapeHtml(s){
     if(s==null)return'';
     return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+/* Pluralização simples pt-BR */
+function plural(n,sing,plu){return n+' '+(n===1?sing:plu)}
+
+/* Helpers de quantidade (Rev. 07: campo numérico editável) */
+function getQty(row){
+    const el=row.querySelector('.qty-value');
+    const v=parseInt(el.value,10);
+    return(isNaN(v)||v<0)?0:v;
+}
+function setQty(row,v){
+    v=(isNaN(v)||v<0)?0:Math.floor(v);
+    row.querySelector('.qty-value').value=v;
+    row.querySelector('.qty-down').disabled=v<=0;
+    return v;
+}
+function sanitizeQtyInput(el){
+    let v=parseInt(el.value,10);
+    if(isNaN(v)||v<0)v=0;
+    el.value=v;
+    const row=el.closest('.item-row');
+    if(row)row.querySelector('.qty-down').disabled=v<=0;
+    return v;
 }
 
 function getCats(){
@@ -1770,12 +1786,16 @@ function initVessels(){
             '<input type="radio" name="vessel" value="'+i+'">'+
             '<div class="vessel-info"><div class="vessel-name">'+escapeHtml(v.name)+'</div></div>'+
             '<span class="vessel-badge '+(v.casco==='Aço naval'?'badge-aco':'badge-madeira')+'">'+escapeHtml(v.casco)+'</span>';
-        card.addEventListener('click',()=>{
+        const select=()=>{
             document.querySelectorAll('.vessel-card').forEach(c=>c.classList.remove('selected'));
             card.classList.add('selected');
+            card.querySelector('input[type="radio"]').checked=true;
             state.selectedVessel=v;
             document.getElementById('btn-vessel-next').disabled=false;
-        });
+        };
+        card.addEventListener('click',select);
+        /* Acessibilidade: seleção via teclado (setas no radio) */
+        card.querySelector('input[type="radio"]').addEventListener('change',select);
         grid.appendChild(card);
     });
     document.getElementById('btn-vessel-home').onclick=()=>goScreen('home');
@@ -1794,6 +1814,16 @@ function initVessels(){
 function initCrew(){
     const ids=['inp-name','inp-role','inp-crew','inp-client'];
     ids.forEach(id=>document.getElementById(id).addEventListener('input',function(){this.classList.remove('error')}));
+
+    /* Rev. 07: pré-preenche dados do responsável com a última sessão (24h) */
+    const saved=loadState();
+    if(saved&&saved.crewInfo&&saved.crewInfo.name){
+        document.getElementById('inp-name').value=saved.crewInfo.name||'';
+        document.getElementById('inp-role').value=saved.crewInfo.role||'';
+        document.getElementById('inp-crew').value=saved.crewInfo.crew||'';
+        document.getElementById('inp-client').value=saved.crewInfo.client||'';
+    }
+
     document.getElementById('btn-crew-next').onclick=()=>{
         let ok=true;
         ids.forEach(id=>{
@@ -1841,7 +1871,7 @@ function goToOrder(idTxt){
         '<div class="summary-row"><span class="label">Tipo</span><span class="value">'+modeLabel()+'</span></div>'+
         '<div class="summary-row"><span class="label">Responsável</span><span class="value">'+escapeHtml(state.crewInfo.name)+'</span></div>'+
         '<div class="summary-row"><span class="label">Função</span><span class="value">'+escapeHtml(state.crewInfo.role)+'</span></div>'+
-        '<div class="summary-row"><span class="label">Tripulação</span><span class="value">'+state.crewInfo.crew+' pessoa(s)</span></div>'+
+        '<div class="summary-row"><span class="label">Tripulação</span><span class="value">'+plural(state.crewInfo.crew,'pessoa','pessoas')+'</span></div>'+
         '<div class="summary-row"><span class="label">Cliente</span><span class="value">'+escapeHtml(state.crewInfo.client)+'</span></div>';
     if(state.currentMode==='rancho'){
         document.getElementById('ord-screen-title').textContent='Pedido de Rancho';
@@ -1853,6 +1883,15 @@ function goToOrder(idTxt){
     document.getElementById('ord-back-btn').onclick=()=>{
         if(state.currentMode==='rancho')goScreen('inventory');else goScreen('crew');
     };
+
+    /* Rev. 07: reseta o filtro para "Todos" ao (re)entrar na tela */
+    state.ordFilter='all';
+    document.getElementById('ord-f-all').classList.add('active');
+    document.getElementById('ord-f-filled').classList.remove('active');
+    const ordSearch=document.getElementById('ord-search');
+    ordSearch.value='';
+    document.getElementById('ord-sc').style.display='none';
+
     buildSection('ord');
     if(state.currentMode==='rancho'){
         document.querySelectorAll('#ord-container .item-row').forEach(r=>{
@@ -1877,13 +1916,12 @@ function goToExtra(idTxt){
     const steps=getStepsForMode();
     renderSteps('steps-extra',steps.map(s=>s.label),2);
     document.getElementById('extra-banner').textContent=state.selectedVessel.name;
-    /* CORREÇÃO: elemento extra-banner-id agora existe no HTML */
     document.getElementById('extra-banner-id').innerHTML=escapeHtml(idTxt)+' <span class="mode-badge extra">PEDIDO EXTRA</span>';
     document.getElementById('extra-summary').innerHTML=
         '<div class="summary-row"><span class="label">Tipo</span><span class="value">PEDIDO EXTRA</span></div>'+
         '<div class="summary-row"><span class="label">Responsável</span><span class="value">'+escapeHtml(state.crewInfo.name)+'</span></div>'+
         '<div class="summary-row"><span class="label">Função</span><span class="value">'+escapeHtml(state.crewInfo.role)+'</span></div>'+
-        '<div class="summary-row"><span class="label">Tripulação</span><span class="value">'+state.crewInfo.crew+' pessoa(s)</span></div>'+
+        '<div class="summary-row"><span class="label">Tripulação</span><span class="value">'+plural(state.crewInfo.crew,'pessoa','pessoas')+'</span></div>'+
         '<div class="summary-row"><span class="label">Cliente</span><span class="value">'+escapeHtml(state.crewInfo.client)+'</span></div>';
     initExtraLines();
     goScreen('extra');
@@ -1891,6 +1929,8 @@ function goToExtra(idTxt){
 
 /* ============================================================
    BUILD SECTION - Renderiza categorias e itens
+   (Rev. 07: sem badge "Máx" e sem botão "Máx"; campo de
+   quantidade agora é um input numérico editável)
    ============================================================ */
 function buildSection(prefix){
     const{cats,map}=getCats();
@@ -1913,25 +1953,23 @@ function buildSection(prefix){
             const item=items[ii];
             const uid=prefix+'_'+cat.replace(/\W/g,'_')+'_'+ii;
             const noteHtml=item.note?'<span class="item-note">'+escapeHtml(item.note)+'</span>':'';
-            const maxBadge=isOrder?'<span class="max-qty-badge">Máx '+item.maxQty+'</span>':'';
-            const maxBtn=isOrder?'<button type="button" class="btn-max-qty" aria-label="Definir máximo">Máx</button>':'';
             const showInv=isOrder&&state.currentMode==='rancho';
             const invBadge=showInv?'<span class="inv-qty-badge zero" data-inv-qty="0">Bordo: 0</span>':'';
             const ordLabel=isOrder?'<span class="ord-label">Pedir:</span>':'';
-            html+='<div class="item-row" data-category="'+escapeHtml(cat)+'" data-maxqty="'+item.maxQty+'" data-name="'+escapeHtml(item.name.toLowerCase())+'" data-section="'+prefix+'">'+
+            html+='<div class="item-row" data-category="'+escapeHtml(cat)+'" data-name="'+escapeHtml(item.name.toLowerCase())+'" data-section="'+prefix+'">'+
                 '<input type="checkbox" class="item-checkbox" id="'+uid+'">'+
                 '<div class="item-content">'+
                     '<label for="'+uid+'" class="item-name">'+escapeHtml(item.name)+'</label>'+
                     '<div class="item-details">'+
-                        invBadge+maxBadge+
+                        invBadge+
                         '<span class="unit-badge">'+escapeHtml(item.unit||'—')+'</span>'+
                         ordLabel+
                         '<div class="qty-control">'+
-                            '<button type="button" class="qty-down" aria-label="Diminuir">−</button>'+
-                            '<span class="qty-value">0</span>'+
+                            '<button type="button" class="qty-down" aria-label="Diminuir" disabled>−</button>'+
+                            '<input type="number" class="qty-value" value="0" min="0" step="1" inputmode="numeric" aria-label="Quantidade de '+escapeHtml(item.name)+'">'+
                             '<button type="button" class="qty-up" aria-label="Aumentar">+</button>'+
                         '</div>'+
-                        maxBtn+noteHtml+
+                        noteHtml+
                     '</div>'+
                 '</div>'+
             '</div>';
@@ -1975,20 +2013,28 @@ function initInvControls(){
         const t=e.target.closest('button')||e.target;
         const row=t.closest('.item-row');if(!row)return;
         if(t.classList.contains('qty-up')||t.classList.contains('qty-down')){
-            const span=row.querySelector('.qty-value');
-            let cur=parseInt(span.textContent,10)||0;
+            let cur=getQty(row);
             if(t.classList.contains('qty-up')){
-                cur+=1;
-                span.textContent=cur;
+                cur=setQty(row,cur+1);
                 row.querySelector('.item-checkbox').checked=true;
             }
             if(t.classList.contains('qty-down')&&cur>0){
-                cur-=1;
-                span.textContent=cur;
+                cur=setQty(row,cur-1);
             }
-            row.querySelector('.qty-down').disabled=cur<=0;
             updateInv();
         }
+    });
+    /* Rev. 07: digitação direta no campo de quantidade */
+    c.addEventListener('input',function(e){
+        if(!e.target.classList.contains('qty-value'))return;
+        const row=e.target.closest('.item-row');if(!row)return;
+        const v=parseInt(e.target.value,10);
+        if(!isNaN(v)&&v>0)row.querySelector('.item-checkbox').checked=true;
+        row.querySelector('.qty-down').disabled=!(v>0);
+        updateInv();
+    });
+    c.addEventListener('change',function(e){
+        if(e.target.classList.contains('qty-value')){sanitizeQtyInput(e.target);updateInv()}
     });
     c.querySelectorAll('.item-checkbox').forEach(cb=>cb.addEventListener('change',updateInv));
     const si=document.getElementById('inv-search'),sc=document.getElementById('inv-sc');
@@ -2018,7 +2064,7 @@ function updateInv(){
     const fill=document.getElementById('inv-prog-fill');
     fill.style.width=pct+'%';
     fill.classList.toggle('complete',checked===total&&total>0);
-    document.getElementById('inv-prog-label').textContent=checked+' de '+total+' itens conferidos';
+    document.getElementById('inv-prog-label').textContent=checked+' de '+total+(checked===1&&total===1?' item conferido':' itens conferidos');
     document.getElementById('inv-prog-pct').textContent=pct+'%';
     document.getElementById('btn-inv-next').disabled=checked<total;
     catMap.forEach((v,id)=>{
@@ -2036,7 +2082,7 @@ document.getElementById('btn-inv-next').onclick=function(){
     document.querySelectorAll('#inv-container .item-row').forEach(r=>{
         const cat=r.dataset.category;
         const name=r.querySelector('.item-name').textContent.trim();
-        const qty=r.querySelector('.qty-value').textContent;
+        const qty=String(getQty(r));
         const unit=r.querySelector('.unit-badge').textContent;
         if(!state.inventoryData[cat])state.inventoryData[cat]=[];
         state.inventoryData[cat].push({name,qty,unit});
@@ -2048,6 +2094,8 @@ document.getElementById('btn-inv-next').onclick=function(){
 
 /* ============================================================
    ORDER
+   (Rev. 07: sem limite máximo de quantidade — incremento
+   livre e digitação direta)
    ============================================================ */
 function initOrdControls(){
     const c=document.getElementById('ord-container');
@@ -2055,44 +2103,42 @@ function initOrdControls(){
         const t=e.target.closest('button')||e.target;
         const row=t.closest('.item-row');if(!row)return;
         if(t.classList.contains('qty-up')||t.classList.contains('qty-down')){
-            const span=row.querySelector('.qty-value');
-            let cur=parseInt(span.textContent,10)||0;
-            const max=parseInt(row.dataset.maxqty,10)||0;
+            let cur=getQty(row);
             if(t.classList.contains('qty-up')){
-                /* CORREÇÃO: respeita maxQty ao incrementar */
-                if(max>0&&cur>=max){
-                    showToast('Máximo permitido: '+max,'error');
-                    return;
-                }
-                cur+=1;
-                span.textContent=cur;
+                cur=setQty(row,cur+1);
                 row.querySelector('.item-checkbox').checked=true;
             }
             if(t.classList.contains('qty-down')&&cur>0){
-                cur-=1;
-                span.textContent=cur;
+                cur=setQty(row,cur-1);
                 if(cur===0)row.querySelector('.item-checkbox').checked=false;
             }
-            row.querySelector('.qty-down').disabled=cur<=0;
             updateOrd();
         }
-        if(t.classList.contains('btn-max-qty')){
-            const max=parseInt(row.dataset.maxqty,10)||0;
-            row.querySelector('.qty-value').textContent=max;
-            row.querySelector('.item-checkbox').checked=true;
-            row.querySelector('.qty-down').disabled=false;
+    });
+    /* Rev. 07: digitação direta no campo de quantidade */
+    c.addEventListener('input',function(e){
+        if(!e.target.classList.contains('qty-value'))return;
+        const row=e.target.closest('.item-row');if(!row)return;
+        const v=parseInt(e.target.value,10);
+        row.querySelector('.item-checkbox').checked=!isNaN(v)&&v>0;
+        row.querySelector('.qty-down').disabled=!(v>0);
+        updateOrd();
+    });
+    c.addEventListener('change',function(e){
+        if(e.target.classList.contains('qty-value')){
+            const v=sanitizeQtyInput(e.target);
+            const row=e.target.closest('.item-row');
+            if(row)row.querySelector('.item-checkbox').checked=v>0;
             updateOrd();
         }
     });
     c.querySelectorAll('.item-checkbox').forEach(cb=>cb.addEventListener('change',function(){
         const row=cb.closest('.item-row');
-        if(cb.checked&&parseInt(row.querySelector('.qty-value').textContent,10)===0){
-            row.querySelector('.qty-value').textContent='1';
-            row.querySelector('.qty-down').disabled=false;
+        if(cb.checked&&getQty(row)===0){
+            setQty(row,1);
         }
         if(!cb.checked){
-            row.querySelector('.qty-value').textContent='0';
-            row.querySelector('.qty-down').disabled=true;
+            setQty(row,0);
         }
         updateOrd();
     }));
@@ -2113,8 +2159,7 @@ function initOrdControls(){
         if(!confirm('Limpar todos os itens selecionados do pedido?'))return;
         c.querySelectorAll('.item-row').forEach(r=>{
             r.querySelector('.item-checkbox').checked=false;
-            r.querySelector('.qty-value').textContent='0';
-            r.querySelector('.qty-down').disabled=true;
+            setQty(r,0);
         });
         updateOrd();
         showToast('Pedido limpo.');
@@ -2134,7 +2179,7 @@ function updateOrd(){
     });
     const pct=total?Math.round(checked/total*100):0;
     document.getElementById('ord-prog-fill').style.width=pct+'%';
-    document.getElementById('ord-prog-label').textContent=checked+' itens selecionados';
+    document.getElementById('ord-prog-label').textContent=plural(checked,'item selecionado','itens selecionados');
     document.getElementById('ord-prog-pct').textContent=pct+'%';
     catMap.forEach((v,id)=>{
         const b=document.getElementById('fill-'+id);
@@ -2169,7 +2214,7 @@ function addExtraLine(){
         '<span class="line-num">'+extraLineCount.toString().padStart(2,'0')+'</span>'+
         '<input type="text" placeholder="Descrição do item" class="extra-desc" aria-label="Descrição do item">'+
         '<select class="extra-unit" aria-label="Unidade">'+opts+'</select>'+
-        '<input type="number" min="0" placeholder="Qtd" class="extra-qty" aria-label="Quantidade">'+
+        '<input type="number" min="0" step="1" inputmode="numeric" placeholder="Qtd" class="extra-qty" aria-label="Quantidade">'+
         '<button type="button" class="btn-rm" title="Remover" aria-label="Remover linha"><svg><use href="#i-x"/></svg></button>';
     div.querySelector('.btn-rm').onclick=()=>{div.remove();reindexExtra();updateExtraCounter()};
     wrap.appendChild(div);
@@ -2341,9 +2386,11 @@ function _generatePDF(){
     const orderByCat=new Map();let orderTotal=0;
     document.querySelectorAll('#ord-container .item-row').forEach(r=>{
         if(!r.querySelector('.item-checkbox').checked)return;
+        const qtyNum=getQty(r);
+        if(qtyNum<=0)return; /* segurança: ignora marcados com quantidade zero */
         const cat=r.dataset.category;
         const name=r.querySelector('.item-name').textContent.trim();
-        const qty=r.querySelector('.qty-value').textContent;
+        const qty=String(qtyNum);
         const unit=r.querySelector('.unit-badge').textContent;
         const noteEl=r.querySelector('.item-note');
         const note=noteEl?noteEl.textContent.trim():'';
@@ -2581,7 +2628,11 @@ window.addEventListener('beforeinstallprompt',e=>{
     e.preventDefault();
     deferredPrompt=e;
     /* Só mostra se o usuário não dispensou antes */
-    if(localStorage.getItem('pwa_install_dismissed')!=='1'){
+    try{
+        if(localStorage.getItem('pwa_install_dismissed')!=='1'){
+            document.getElementById('install-banner').classList.add('show');
+        }
+    }catch(err){
         document.getElementById('install-banner').classList.add('show');
     }
 });
